@@ -49,7 +49,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="text-center py-4 bg-primary/5 rounded-lg">
         <p className="text-lg font-semibold text-primary" data-testid="text-safety-quote">
-          당신의 안전이 가족의 미소를 지킵니다.
+          "당신의 안전이 가족의 미소를 지킵니다."
         </p>
       </div>
 
