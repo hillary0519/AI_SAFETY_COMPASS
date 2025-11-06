@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Dashboard from "@/pages/dashboard";
 import CreatePermit from "@/pages/create-permit";
 import MyPermits from "@/pages/my-permits";
+import PendingPermits from "@/pages/pending-permits";
 import AccidentCases from "@/pages/accident-cases";
 import NotFound from "@/pages/not-found";
 import { Moon, Sun } from "lucide-react";
@@ -51,7 +52,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/create" component={CreatePermit} />
       <Route path="/my-permits" component={MyPermits} />
-      <Route path="/pending" component={MyPermits} />
+      <Route path="/pending" component={PendingPermits} />
       <Route path="/all-permits" component={MyPermits} />
       <Route path="/accident-cases" component={AccidentCases} />
       <Route path="/statistics" component={MyPermits} />

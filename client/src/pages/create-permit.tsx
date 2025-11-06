@@ -305,23 +305,28 @@ export default function CreatePermit() {
 
       <div className="min-h-[500px]">{renderStep()}</div>
 
-      <div className="flex items-center justify-between pt-6 border-t">
-        <Button
-          variant="outline"
-          onClick={handlePrev}
-          disabled={currentStep === 1}
-          data-testid="button-prev"
-        >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          이전
-        </Button>
-
-        {currentStep !== 2 && (
-          <Button onClick={handleNext} data-testid="button-next">
-            {currentStep === 4 ? "제출하기" : "다음"}
-            {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+      <div className="pt-6 border-t space-y-4">
+        <p className="text-xs text-center text-muted-foreground" data-testid="text-disclaimer">
+          Safety Compass도 실수를 할 수 있습니다. 중요한 정보는 반드시 확인하세요.
+        </p>
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrev}
+            disabled={currentStep === 1}
+            data-testid="button-prev"
+          >
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            이전
           </Button>
-        )}
+
+          {currentStep !== 2 && (
+            <Button onClick={handleNext} data-testid="button-next">
+              {currentStep === 4 ? "제출하기" : "다음"}
+              {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+            </Button>
+          )}
+        </div>
       </div>
 
       <VOCDialog

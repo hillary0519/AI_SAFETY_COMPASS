@@ -57,7 +57,7 @@ export function AppSidebar() {
             <Shield className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-bold text-base" data-testid="text-sidebar-title">안전작업허가</h2>
+            <h2 className="font-bold text-base" data-testid="text-sidebar-title">안전작업허가서</h2>
             <p className="text-xs text-muted-foreground">Safety Permit</p>
           </div>
         </div>

@@ -19,12 +19,12 @@ export default function AccidentCaseDialog({
 }: AccidentCaseDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col" data-testid="dialog-accident-case">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{caseTitle}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 p-4 overflow-y-auto flex-1 min-h-0">
           <div className="space-y-2">
             <h3 className="font-bold text-base">발생 일시</h3>
             <div className="border-b pb-4"></div>

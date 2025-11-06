@@ -6,6 +6,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
 
 interface SafetyCompassDialogProps {
   open: boolean;
@@ -18,6 +20,8 @@ export default function SafetyCompassDialog({
   onOpenChange,
   onNext,
 }: SafetyCompassDialogProps) {
+  const [acknowledged, setAcknowledged] = useState(false);
+
   const handleNext = () => {
     onOpenChange(false);
     onNext();
@@ -53,14 +57,30 @@ export default function SafetyCompassDialog({
           </div>
 
           <div className="bg-muted p-4 rounded-lg mt-6">
-            <p className="text-sm text-center">
-              □ 과거이력·설비·건강상태를 기반으로 위험성평가를 수행합니다
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              <Checkbox 
+                id="compass-acknowledge" 
+                checked={acknowledged}
+                onCheckedChange={(checked) => setAcknowledged(checked as boolean)}
+                data-testid="checkbox-compass-acknowledge"
+              />
+              <label 
+                htmlFor="compass-acknowledge" 
+                className="text-sm cursor-pointer select-none"
+              >
+                과거이력·설비·건강상태를 기반으로 위험성평가를 수행합니다
+              </label>
+            </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button onClick={handleNext} className="w-full" data-testid="button-compass-next">
+          <Button 
+            onClick={handleNext} 
+            className="w-full" 
+            disabled={!acknowledged}
+            data-testid="button-compass-next"
+          >
             다음
           </Button>
         </DialogFooter>
