@@ -259,6 +259,12 @@ export default function CreatePermit() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="text-center py-4 bg-primary/5 rounded-lg">
+        <p className="text-lg font-semibold text-primary" data-testid="text-safety-quote">
+          당신의 안전이 가족의 미소를 지킵니다.
+        </p>
+      </div>
+
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-create-title">
