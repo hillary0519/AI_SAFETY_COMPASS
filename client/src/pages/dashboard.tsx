@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Plus, Trash2 } from "lucide-react";
 import DashboardStats from "@/components/DashboardStats";
+import RecentPermitsTable from "@/components/RecentPermitsTable";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import {
@@ -84,6 +85,8 @@ export default function Dashboard() {
       </div>
 
       <DashboardStats />
+
+      <RecentPermitsTable />
     </div>
   );
 }
