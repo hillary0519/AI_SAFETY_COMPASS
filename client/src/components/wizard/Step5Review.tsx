@@ -17,6 +17,7 @@ interface ReviewData {
 
 interface Step5Props {
   data: ReviewData;
+  onCasesViewed: (viewedAll: boolean) => void;
 }
 
 const accidentCases = [
@@ -32,9 +33,10 @@ const accidentCases = [
   },
 ];
 
-export default function Step5Review({ data }: Step5Props) {
+export default function Step5Review({ data, onCasesViewed }: Step5Props) {
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
   const [caseDialogOpen, setCaseDialogOpen] = useState(false);
+  const [viewedCases, setViewedCases] = useState<Set<number>>(new Set());
 
   const formatDateTime = (datetime: string) => {
     if (!datetime) return "○ ○ ○";
@@ -49,9 +51,16 @@ export default function Step5Review({ data }: Step5Props) {
     });
   };
 
-  const handleCaseClick = (caseTitle: string) => {
+  const handleCaseClick = (caseId: number, caseTitle: string) => {
     setSelectedCase(caseTitle);
     setCaseDialogOpen(true);
+    
+    const newViewedCases = new Set(viewedCases);
+    newViewedCases.add(caseId);
+    setViewedCases(newViewedCases);
+    
+    // Check if all cases have been viewed
+    onCasesViewed(newViewedCases.size === accidentCases.length);
   };
 
   return (
@@ -112,42 +121,29 @@ export default function Step5Review({ data }: Step5Props) {
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <p className="font-semibold text-destructive">추천 안전사고 사례</p>
-                {data.alerts.map((alert, index) => (
-                  <p key={index} className="text-sm">
-                    #{index + 1} {alert}
-                  </p>
-                ))}
+                <div className="space-y-2 pl-4">
+                  {accidentCases.map((accidentCase, index) => (
+                    <div key={accidentCase.id}>
+                      <button
+                        onClick={() => handleCaseClick(accidentCase.id, accidentCase.title)}
+                        className="text-sm text-primary hover:underline cursor-pointer text-left"
+                        data-testid={`link-accident-case-${accidentCase.id}`}
+                      >
+                        • {accidentCase.fileName}
+                        {viewedCases.has(accidentCase.id) && (
+                          <span className="ml-2 text-green-600">✓</span>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
-
-      <Card className="max-w-3xl">
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <p className="font-semibold flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              🔹 안전사고 사례
-            </p>
-            <div className="space-y-2 pl-6">
-              {accidentCases.map((accidentCase) => (
-                <div key={accidentCase.id}>
-                  <button
-                    onClick={() => handleCaseClick(accidentCase.title)}
-                    className="text-sm text-primary hover:underline cursor-pointer text-left"
-                    data-testid={`link-accident-case-${accidentCase.id}`}
-                  >
-                    • {accidentCase.fileName}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <AccidentCaseDialog
         open={caseDialogOpen}

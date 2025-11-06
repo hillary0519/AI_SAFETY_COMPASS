@@ -24,16 +24,37 @@ export default function AccidentCaseDialog({
           <DialogTitle>{caseTitle}</DialogTitle>
         </DialogHeader>
 
-        <Card className="bg-muted/30">
-          <CardContent className="p-8">
-            <div className="space-y-6">
-              <div className="text-center text-muted-foreground py-12">
-                <p className="text-lg">안전사고 사례 문서</p>
-                <p className="text-sm mt-2">(상세 내용은 준비 중입니다)</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6 p-4">
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">발생 일시</h3>
+            <div className="border-b pb-4"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">발생 장소</h3>
+            <div className="border-b pb-4"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">사고 유형</h3>
+            <div className="border-b pb-4"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">사고 개요</h3>
+            <div className="border-b pb-12"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">원인 분석</h3>
+            <div className="border-b pb-12"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-bold text-base">재발 방지 대책</h3>
+            <div className="border-b pb-12"></div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

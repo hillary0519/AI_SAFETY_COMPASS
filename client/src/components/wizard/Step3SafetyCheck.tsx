@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -68,7 +71,9 @@ const riskAssessments = [
     procedure: "작업 전 위험성 평가 및 밀폐공간 허가서 작성",
     hazard: "위험요인 미파악, 신입자 이해 부족",
     accident: "부적절한 안전조치로 인한 사고",
-    risk: "3 / 3 / 9",
+    f: 3,
+    c: 3,
+    r: 9,
     mitigation: "신입자 대상 밀폐작업 안전교육 실시",
   },
   {
@@ -76,7 +81,9 @@ const riskAssessments = [
     procedure: "작업장 환기 및 가스농도 측정",
     hazard: "산소결핍, 유해가스(O₂<18%)",
     accident: "질식, 의식소실",
-    risk: "2 / 5 / 10",
+    f: 2,
+    c: 5,
+    r: 10,
     mitigation: "불티팬 설치, 산소농도 측정기 사용, 농도기록 유지, 30분 간격 재측정",
   },
   {
@@ -84,7 +91,9 @@ const riskAssessments = [
     procedure: "전원차단 및 Lock-Out / Tag-Out 실시",
     hazard: "전원차단 미이행, 타회선 감전",
     accident: "감전사고, 화상",
-    risk: "3 / 3 / 9",
+    f: 3,
+    c: 3,
+    r: 9,
     mitigation: "MCC 전원차단 후 LOTO 부착, 감전방지장갑·절연장구 사용, 담당자 확인서명",
   },
   {
@@ -92,7 +101,9 @@ const riskAssessments = [
     procedure: "Sensor 탈거 작업",
     hazard: "오염 누유, 바닥 미끄러움",
     accident: "골절, 안전, 타박상",
-    risk: "3 / 2 / 6",
+    f: 3,
+    c: 2,
+    r: 6,
     mitigation: "흡유포 설치, 안전화 착용, 발판 고정, 바닥청소 철저",
   },
   {
@@ -100,7 +111,9 @@ const riskAssessments = [
     procedure: "Sensor 결선 및 전선 접속",
     hazard: "전열발열, 절연불량, 접속공간 자세",
     accident: "감전, 근골격계 질환",
-    risk: "3 / 3 / 9",
+    f: 3,
+    c: 3,
+    r: 9,
     mitigation: "절연테이프 보강, 전원 차단확인, 스트레칭/휴식 병행",
   },
   {
@@ -108,7 +121,9 @@ const riskAssessments = [
     procedure: "고열환경에서의 작업 지속",
     hazard: "더위, 체온상승, 탈수",
     accident: "열사병, 실신",
-    risk: "2 / 3 / 6",
+    f: 2,
+    c: 3,
+    r: 6,
     mitigation: "휴식 및 수분섭취 1시간 1회, 송풍기 가동, 냉타올 비치, 폭염 시 작업중지",
   },
   {
@@ -116,7 +131,9 @@ const riskAssessments = [
     procedure: "협소공간 내 이동 및 작업자 교대",
     hazard: "시야제한, 케이블 걸림",
     accident: "낙상, 전도",
-    risk: "3 / 3 / 9",
+    f: 3,
+    c: 3,
+    r: 9,
     mitigation: "케이블 정리, 조명 확보기, 2인 1조 작업, 접근로 확보",
   },
   {
@@ -124,7 +141,9 @@ const riskAssessments = [
     procedure: "교체 후 전원 투입 전 점검",
     hazard: "전원 조기투입, 접지불량",
     accident: "감전, 장비손상",
-    risk: "3 / 3 / 9",
+    f: 3,
+    c: 3,
+    r: 9,
     mitigation: "접선, 절연저항계, 계측기 사용",
   },
   {
@@ -132,7 +151,9 @@ const riskAssessments = [
     procedure: "작업후 청소 및 장비 원위치",
     hazard: "바닥 오염잔류, 도구 방치",
     accident: "전도, 낙상",
-    risk: "2 / 3 / 6",
+    f: 2,
+    c: 3,
+    r: 6,
     mitigation: "청소장소 및 도구 정리 후 확인서명, 정리정돈 점검",
   },
   {
@@ -140,12 +161,24 @@ const riskAssessments = [
     procedure: "작업종료 보고 및 허가서 회수",
     hazard: "보고 누락, 허가서 미회수",
     accident: "관리 부실, 재발 방지 실패",
-    risk: "1 / 3 / 3",
+    f: 1,
+    c: 3,
+    r: 3,
     mitigation: "작업종료 보고서 작성, 허가서 회수 후 보관",
   },
 ];
 
 export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
+  const [useAfter, setUseAfter] = useState(false);
+
+  // Calculate max R value
+  const maxR = Math.max(...riskAssessments.map(item => item.r));
+  
+  // Calculate risk scores
+  const baseScore = riskAssessments.reduce((sum, item) => sum + item.r, 0);
+  const aiScore = 15; // AI-based score from equipment/temp/health factors
+  const totalScore = baseScore + aiScore;
+
   return (
     <div className="space-y-6">
       <div>
@@ -277,7 +310,29 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>작업절차 (위험성평가)</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2 flex-1">
+              <CardTitle>작업절차 (위험성평가)</CardTitle>
+              <div className="text-sm space-y-1">
+                <p className="font-semibold">※ 위험성 평가는 {totalScore}점 입니다. (중등급)</p>
+                <p className="text-muted-foreground">- 기존 위험성 평가 결과는 {baseScore}점,</p>
+                <p className="text-muted-foreground">- 과거 이력, 설비 상태, 작업자 건강상태 기반 위험성 평가 결과 : {aiScore}점</p>
+                <p className="text-muted-foreground">- 설비 : 고위험 설비</p>
+                <p className="text-muted-foreground">- 기온 : 고온상태</p>
+                <p className="text-muted-foreground">- 건강상태 : 고혈압 가중치 반영</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Label htmlFor="toggle-mode">BEFORE</Label>
+              <Switch
+                id="toggle-mode"
+                checked={useAfter}
+                onCheckedChange={setUseAfter}
+                data-testid="switch-before-after"
+              />
+              <Label htmlFor="toggle-mode">AFTER</Label>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -287,21 +342,32 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
                 <TableHead className="min-w-[200px]">주요작업절차</TableHead>
                 <TableHead className="min-w-[150px]">위험요인</TableHead>
                 <TableHead className="min-w-[120px]">예상사고</TableHead>
-                <TableHead className="w-32">위험등급 (F/C/R)</TableHead>
+                <TableHead className="w-16 text-center">F</TableHead>
+                <TableHead className="w-16 text-center">C</TableHead>
+                <TableHead className="w-16 text-center">R</TableHead>
                 <TableHead className="min-w-[250px]">감소대책</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {riskAssessments.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.id}</TableCell>
-                  <TableCell>{item.procedure}</TableCell>
-                  <TableCell>{item.hazard}</TableCell>
-                  <TableCell>{item.accident}</TableCell>
-                  <TableCell className="text-center font-semibold">{item.risk}</TableCell>
-                  <TableCell>{item.mitigation}</TableCell>
-                </TableRow>
-              ))}
+              {riskAssessments.map((item) => {
+                const rValue = useAfter ? Math.round(item.r * 1.2 * 10) / 10 : item.r;
+                const isMaxR = item.r === maxR;
+                
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.id}</TableCell>
+                    <TableCell>{item.procedure}</TableCell>
+                    <TableCell>{item.hazard}</TableCell>
+                    <TableCell>{item.accident}</TableCell>
+                    <TableCell className="text-center font-semibold">{item.f}</TableCell>
+                    <TableCell className="text-center font-semibold">{item.c}</TableCell>
+                    <TableCell className={`text-center font-semibold ${isMaxR && !useAfter ? 'text-destructive' : ''}`}>
+                      {rValue}
+                    </TableCell>
+                    <TableCell>{item.mitigation}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

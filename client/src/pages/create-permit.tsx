@@ -6,7 +6,7 @@ import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
 import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
 import Step5Review from "@/components/wizard/Step5Review";
-import SignatureDialog from "@/components/SignatureDialog";
+import VOCDialog from "@/components/VOCDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,8 +24,9 @@ export default function CreatePermit() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [signatureOpen, setSignatureOpen] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const [casesViewedAll, setCasesViewedAll] = useState(false);
+  const [vocDialogOpen, setVocDialogOpen] = useState(false);
 
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [basicInfo, setBasicInfo] = useState({
@@ -139,7 +140,17 @@ export default function CreatePermit() {
     if (currentStep < 4) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      setSignatureOpen(true);
+      // Step 4: Check if all cases have been viewed
+      if (!casesViewedAll) {
+        toast({
+          title: "안전사고 사례를 모두 확인해주세요",
+          description: "두 개의 안전사고 사례를 모두 클릭하여 확인해야 제출할 수 있습니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Open VOC dialog instead of signature
+      setVocDialogOpen(true);
     }
   };
 
@@ -149,14 +160,47 @@ export default function CreatePermit() {
     }
   };
 
-  const handleSubmit = () => {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
-    toast({
-      title: "제출 완료",
-      description: "안전작업허가서가 성공적으로 생성되었습니다.",
-    });
-    console.log("Submitting:", { workTypes, basicInfo, safetyChecks });
-    setLocation("/");
+  const handleSubmit = async (vocComment: string) => {
+    try {
+      // Submit permit to backend
+      const response = await fetch("/api/permits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          workTypes: workTypes.join(", "),
+          workName: basicInfo.workName,
+          workArea: basicInfo.workArea,
+          equipmentName: basicInfo.equipmentName,
+          workerName: basicInfo.workerName,
+          department: basicInfo.department,
+          workStartDate: basicInfo.workStartDate,
+          workEndDate: basicInfo.workEndDate,
+          workDescription: basicInfo.workDescription,
+          safetyChecks,
+          vocComment,
+          status: "pending",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit permit");
+      }
+
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      toast({
+        title: "제출 완료",
+        description: "안전작업허가서가 성공적으로 생성되었습니다.",
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "제출 실패",
+        description: "허가서 제출 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderStep = () => {
@@ -197,6 +241,7 @@ export default function CreatePermit() {
                 "광양 압연실비나부 관3열연공장 차단기 인출 후 단독으로 절차 작업 중 아크 화상",
               ],
             }}
+            onCasesViewed={setCasesViewedAll}
           />
         );
       default:
@@ -271,15 +316,17 @@ export default function CreatePermit() {
           이전
         </Button>
 
-        <Button onClick={handleNext} data-testid="button-next">
-          {currentStep === 4 ? "제출하기" : "다음"}
-          {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
-        </Button>
+        {currentStep !== 2 && (
+          <Button onClick={handleNext} data-testid="button-next">
+            {currentStep === 4 ? "제출하기" : "다음"}
+            {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+          </Button>
+        )}
       </div>
 
-      <SignatureDialog
-        open={signatureOpen}
-        onOpenChange={setSignatureOpen}
+      <VOCDialog
+        open={vocDialogOpen}
+        onOpenChange={setVocDialogOpen}
         onSubmit={handleSubmit}
       />
     </div>

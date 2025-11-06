@@ -21,6 +21,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create work permit endpoint
+  app.post("/api/permits", async (req, res) => {
+    try {
+      const {
+        workTypes,
+        workName,
+        workArea,
+        equipmentName,
+        workerName,
+        department,
+        workStartDate,
+        workEndDate,
+        workDescription,
+        safetyChecks,
+        vocComment,
+        status,
+      } = req.body;
+
+      const permit = await storage.createPermit({
+        workType: workTypes,
+        workName,
+        workArea,
+        equipmentName,
+        workerName,
+        department,
+        workPeriodStart: workStartDate,
+        workPeriodEnd: workEndDate,
+        workDescription,
+        safetyChecks: JSON.stringify(safetyChecks),
+        vocComment,
+        status,
+      });
+
+      res.json(permit);
+    } catch (error) {
+      console.error("Create permit error:", error);
+      res.status(500).json({ error: "Failed to create permit" });
+    }
+  });
+
+  // Get permits endpoint
+  app.get("/api/permits", async (req, res) => {
+    try {
+      const { status } = req.query;
+      const permits = await storage.getPermits(status as string);
+      res.json(permits);
+    } catch (error) {
+      console.error("Get permits error:", error);
+      res.status(500).json({ error: "Failed to get permits" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

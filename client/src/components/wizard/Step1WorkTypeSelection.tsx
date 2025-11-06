@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowUp, Flame, Building2, Zap, Truck } from "lucide-react";
+import { ArrowUp, Flame, Building2, Zap, Wrench } from "lucide-react";
 import { Check } from "lucide-react";
 
 interface WorkType {
@@ -40,9 +40,9 @@ const workTypes: WorkType[] = [
     color: "text-chart-3",
   },
   {
-    id: "중장비작업",
-    name: "중장비작업",
-    icon: <Truck className="w-12 h-12" />,
+    id: "일반작업",
+    name: "일반작업",
+    icon: <Wrench className="w-12 h-12" />,
     color: "text-chart-2",
   },
 ];

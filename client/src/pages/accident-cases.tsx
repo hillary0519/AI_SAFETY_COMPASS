@@ -91,8 +91,8 @@ export default function AccidentCases() {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-5xl mx-auto">
-      <div className="mb-6">
+    <div className="flex flex-col max-w-5xl mx-auto h-[calc(100vh-12rem)]">
+      <div className="mb-6 flex-shrink-0">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
             <FileText className="w-6 h-6 text-primary" />

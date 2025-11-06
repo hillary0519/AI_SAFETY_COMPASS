@@ -71,7 +71,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="workerName">작업지명</Label>
+            <Label htmlFor="workerName">작업자명</Label>
             <Input
               id="workerName"
               placeholder="예: 김철수"
@@ -135,7 +135,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
             onClick={() => setCompassOpen(true)}
             data-testid="button-safety-compass"
           >
-            <Compass className="w-6 h-6 mr-2" />
+            <Compass className="w-8 h-8 mr-3 text-yellow-300" />
             Safety Compass
           </Button>
         </div>
