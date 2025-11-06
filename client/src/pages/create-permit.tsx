@@ -5,6 +5,7 @@ import StepIndicator from "@/components/StepIndicator";
 import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
 import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
+import Step4RiskAssessment from "@/components/wizard/Step4RiskAssessment";
 import Step5Review from "@/components/wizard/Step5Review";
 import VOCDialog from "@/components/VOCDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +16,8 @@ const steps = [
   { number: 1, title: "작업 유형 선택" },
   { number: 2, title: "기본 정보" },
   { number: 3, title: "안전 점검" },
-  { number: 4, title: "검토 및 제출" },
+  { number: 4, title: "위험성 평가" },
+  { number: 5, title: "검토 및 제출" },
 ];
 
 const DRAFT_STORAGE_KEY = "permit_draft";
@@ -124,7 +126,10 @@ export default function CreatePermit() {
     }));
   };
 
-  const handleCompassNext = () => {
+  const handleCompassNext = (addConfinedSpace: boolean) => {
+    if (addConfinedSpace && !workTypes.includes("밀폐공간작업")) {
+      setWorkTypes((prev) => [...prev, "밀폐공간작업"]);
+    }
     setCurrentStep(3);
   };
 
@@ -137,10 +142,10 @@ export default function CreatePermit() {
       return;
     }
 
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Step 4: Check if all cases have been viewed
+      // Step 5: Check if all cases have been viewed
       if (!casesViewedAll) {
         toast({
           title: "안전사고 사례를 모두 확인해주세요",
@@ -220,6 +225,8 @@ export default function CreatePermit() {
       case 3:
         return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} />;
       case 4:
+        return <Step4RiskAssessment />;
+      case 5:
         return (
           <Step5Review
             data={{
@@ -322,8 +329,8 @@ export default function CreatePermit() {
 
           {currentStep !== 2 && (
             <Button onClick={handleNext} data-testid="button-next">
-              {currentStep === 4 ? "제출하기" : "다음"}
-              {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+              {currentStep === 5 ? "제출하기" : "다음"}
+              {currentStep < 5 && <ChevronRight className="w-4 h-4 ml-2" />}
             </Button>
           )}
         </div>

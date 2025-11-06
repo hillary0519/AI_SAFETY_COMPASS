@@ -12,7 +12,7 @@ import { useState } from "react";
 interface SafetyCompassDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onNext: () => void;
+  onNext: (addConfinedSpace: boolean) => void;
 }
 
 export default function SafetyCompassDialog({
@@ -21,10 +21,11 @@ export default function SafetyCompassDialog({
   onNext,
 }: SafetyCompassDialogProps) {
   const [acknowledged, setAcknowledged] = useState(false);
+  const [addConfinedSpace, setAddConfinedSpace] = useState(false);
 
   const handleNext = () => {
     onOpenChange(false);
-    onNext();
+    onNext(addConfinedSpace);
   };
 
   return (
@@ -56,7 +57,7 @@ export default function SafetyCompassDialog({
             </p>
           </div>
 
-          <div className="bg-muted p-4 rounded-lg mt-6">
+          <div className="bg-muted p-4 rounded-lg mt-6 space-y-3">
             <div className="flex items-center justify-center gap-2">
               <Checkbox 
                 id="compass-acknowledge" 
@@ -69,6 +70,20 @@ export default function SafetyCompassDialog({
                 className="text-sm cursor-pointer select-none"
               >
                 과거이력·설비·건강상태를 기반으로 위험성평가를 수행합니다
+              </label>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <Checkbox 
+                id="compass-add-confined-space" 
+                checked={addConfinedSpace}
+                onCheckedChange={(checked) => setAddConfinedSpace(checked as boolean)}
+                data-testid="checkbox-add-confined-space"
+              />
+              <label 
+                htmlFor="compass-add-confined-space" 
+                className="text-sm cursor-pointer select-none"
+              >
+                설비 특성 반영하여 작업 유형에 「밀폐공간작업」을 추가합니다.
               </label>
             </div>
           </div>
