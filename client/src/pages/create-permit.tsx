@@ -5,8 +5,8 @@ import StepIndicator from "@/components/StepIndicator";
 import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
 import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
-import Step4RiskAssessment from "@/components/wizard/Step4RiskAssessment";
 import Step5Review from "@/components/wizard/Step5Review";
+import SignatureDialog from "@/components/SignatureDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -21,8 +21,9 @@ export default function CreatePermit() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [signatureOpen, setSignatureOpen] = useState(false);
 
-  const [workType, setWorkType] = useState("");
+  const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [basicInfo, setBasicInfo] = useState({
     workName: "",
     workArea: "",
@@ -36,7 +37,15 @@ export default function CreatePermit() {
   const [safetyChecks, setSafetyChecks] = useState({
     requirements1: [] as string[],
     requirements2: [] as string[],
+    equipment: [] as string[],
+    protective: [] as string[],
   });
+
+  const handleWorkTypeToggle = (type: string) => {
+    setWorkTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
 
   const handleBasicInfoChange = (field: keyof typeof basicInfo, value: string) => {
     setBasicInfo((prev) => ({ ...prev, [field]: value }));
@@ -51,8 +60,12 @@ export default function CreatePermit() {
     }));
   };
 
+  const handleCompassNext = () => {
+    setCurrentStep(3);
+  };
+
   const handleNext = () => {
-    if (currentStep === 1 && !workType) {
+    if (currentStep === 1 && workTypes.length === 0) {
       toast({
         title: "작업 유형을 선택해주세요",
         variant: "destructive",
@@ -63,13 +76,7 @@ export default function CreatePermit() {
     if (currentStep < 4) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // TODO: Remove mock functionality - Implement actual submission
-      toast({
-        title: "제출 완료",
-        description: "안전작업허가서가 성공적으로 생성되었습니다.",
-      });
-      console.log("Submitting:", { workType, basicInfo, safetyChecks });
-      setLocation("/");
+      setSignatureOpen(true);
     }
   };
 
@@ -79,26 +86,48 @@ export default function CreatePermit() {
     }
   };
 
+  const handleSubmit = () => {
+    toast({
+      title: "제출 완료",
+      description: "안전작업허가서가 성공적으로 생성되었습니다.",
+    });
+    console.log("Submitting:", { workTypes, basicInfo, safetyChecks });
+    setLocation("/");
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1WorkTypeSelection selectedType={workType} onSelect={setWorkType} />;
+        return (
+          <Step1WorkTypeSelection selectedTypes={workTypes} onToggle={handleWorkTypeToggle} />
+        );
       case 2:
-        return <Step2BasicInfo data={basicInfo} onChange={handleBasicInfoChange} />;
+        return (
+          <Step2BasicInfo
+            data={basicInfo}
+            onChange={handleBasicInfoChange}
+            onCompassNext={handleCompassNext}
+          />
+        );
       case 3:
         return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} />;
       case 4:
         return (
           <Step5Review
             data={{
-              workType,
+              workType: workTypes.join(", "),
               workName: basicInfo.workName,
               workArea: basicInfo.workArea,
               workerName: basicInfo.workerName,
               department: basicInfo.department,
               workStartDate: basicInfo.workStartDate,
               workEndDate: basicInfo.workEndDate,
-              riskScore: `${safetyChecks.requirements1.length + safetyChecks.requirements2.length}/28 항목`,
+              riskScore: `${
+                safetyChecks.requirements1.length +
+                safetyChecks.requirements2.length +
+                safetyChecks.equipment.length +
+                safetyChecks.protective.length
+              }/28 항목`,
               alerts: [
                 "광양 4열연공장 개구부 덮어짐",
                 "광양 압연실비나부 관3열연공장 차단기 인출 후 단독으로 절차 작업 중 아크 화상",
@@ -142,6 +171,12 @@ export default function CreatePermit() {
           {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
         </Button>
       </div>
+
+      <SignatureDialog
+        open={signatureOpen}
+        onOpenChange={setSignatureOpen}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

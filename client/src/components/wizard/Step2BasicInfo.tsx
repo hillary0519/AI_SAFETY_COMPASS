@@ -1,6 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Compass } from "lucide-react";
+import { useState } from "react";
+import SafetyCompassDialog from "@/components/SafetyCompassDialog";
 
 interface BasicInfo {
   workName: string;
@@ -16,9 +20,12 @@ interface BasicInfo {
 interface Step2Props {
   data: BasicInfo;
   onChange: (field: keyof BasicInfo, value: string) => void;
+  onCompassNext: () => void;
 }
 
-export default function Step2BasicInfo({ data, onChange }: Step2Props) {
+export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2Props) {
+  const [compassOpen, setCompassOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div>
@@ -137,7 +144,25 @@ export default function Step2BasicInfo({ data, onChange }: Step2Props) {
             data-testid="textarea-work-description"
           />
         </div>
+
+        <div className="pt-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setCompassOpen(true)}
+            data-testid="button-safety-compass"
+          >
+            <Compass className="w-4 h-4 mr-2" />
+            Safety Compass
+          </Button>
+        </div>
       </div>
+
+      <SafetyCompassDialog
+        open={compassOpen}
+        onOpenChange={setCompassOpen}
+        onNext={onCompassNext}
+      />
     </div>
   );
 }

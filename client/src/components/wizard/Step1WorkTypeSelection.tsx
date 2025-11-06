@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUp, Flame, Building2, Zap, Truck } from "lucide-react";
+import { Check } from "lucide-react";
 
 interface WorkType {
   id: string;
@@ -9,8 +10,8 @@ interface WorkType {
 }
 
 interface Step1Props {
-  selectedType: string;
-  onSelect: (type: string) => void;
+  selectedTypes: string[];
+  onToggle: (type: string) => void;
 }
 
 const workTypes: WorkType[] = [
@@ -46,7 +47,7 @@ const workTypes: WorkType[] = [
   },
 ];
 
-export default function Step1WorkTypeSelection({ selectedType, onSelect }: Step1Props) {
+export default function Step1WorkTypeSelection({ selectedTypes, onToggle }: Step1Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -55,21 +56,29 @@ export default function Step1WorkTypeSelection({ selectedType, onSelect }: Step1
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {workTypes.map((type) => (
-          <Card
-            key={type.id}
-            className={`cursor-pointer transition-all hover-elevate ${
-              selectedType === type.id ? "ring-2 ring-primary" : ""
-            }`}
-            onClick={() => onSelect(type.id)}
-            data-testid={`card-work-type-${type.id}`}
-          >
-            <CardContent className="flex flex-col items-center justify-center p-8">
-              <div className={type.color}>{type.icon}</div>
-              <p className="mt-4 font-semibold text-center">{type.name}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {workTypes.map((type) => {
+          const isSelected = selectedTypes.includes(type.id);
+          return (
+            <Card
+              key={type.id}
+              className={`cursor-pointer transition-all hover-elevate relative ${
+                isSelected ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => onToggle(type.id)}
+              data-testid={`card-work-type-${type.id}`}
+            >
+              {isSelected && (
+                <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <Check className="w-4 h-4 text-primary-foreground" />
+                </div>
+              )}
+              <CardContent className="flex flex-col items-center justify-center p-8">
+                <div className={type.color}>{type.icon}</div>
+                <p className="mt-4 font-semibold text-center">{type.name}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
