@@ -1,117 +1,146 @@
 import { useState } from "react";
-import type { WorkPermitInput, GeneratedPermit } from "@shared/schema";
-import PermitInputForm from "@/components/PermitInputForm";
-import PermitOutput from "@/components/PermitOutput";
-import EmptyState from "@/components/EmptyState";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import StepIndicator from "@/components/StepIndicator";
+import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
+import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
+import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
+import Step4RiskAssessment from "@/components/wizard/Step4RiskAssessment";
+import Step5Review from "@/components/wizard/Step5Review";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+
+const steps = [
+  { number: 1, title: "작업 유형 선택" },
+  { number: 2, title: "기본 정보" },
+  { number: 3, title: "안전 점검" },
+  { number: 4, title: "검토 및 제출" },
+];
 
 export default function CreatePermit() {
-  const [generatedPermit, setGeneratedPermit] = useState<GeneratedPermit | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const handleSubmit = async (data: WorkPermitInput) => {
-    setIsLoading(true);
-    console.log("Generating permit for:", data);
+  const [workType, setWorkType] = useState("");
+  const [basicInfo, setBasicInfo] = useState({
+    workName: "",
+    workArea: "",
+    equipmentName: "",
+    workerName: "",
+    department: "",
+    workStartDate: "",
+    workEndDate: "",
+    workDescription: "",
+  });
+  const [safetyChecks, setSafetyChecks] = useState({
+    requirements1: [] as string[],
+    requirements2: [] as string[],
+  });
 
-    // TODO: Remove mock functionality - Replace with actual API call
-    setTimeout(() => {
-      const mockPermit: GeneratedPermit = {
-        procedures: [
-          "전원 차단 및 잠금장치(LOTO) 설치",
-          "작업구역 안전 펜스 설치 및 출입통제",
-          "보호장비 착용 확인 (안전모, 절연장갑, 안전화)",
-          "안전 감시자 배치 및 비상연락망 확인",
-          `${data.equipmentName} 접근 및 작업 수행`,
-          "작업 완료 후 청소 및 정리정돈",
-          "테스트 시운전 실시 및 이상 유무 확인",
-        ],
-        hazards: [
-          "전원 미차단 상태에서 접근 시 감전 위험",
-          "작업장 바닥 미끄럼으로 인한 낙상 위험",
-          "공구 낙하로 인한 상해 위험",
-          "작업 중 협착 및 끼임 위험",
-          "화재 발생 가능성",
-        ],
-        accidentTypes: ["감전", "낙상", "협착", "화재", "물체 낙하"],
-        safetyMeasures: [
-          "전원 차단 및 확인",
-          "미끄럼 방지 매트 설치",
-          "안전모 착용",
-          "절연장갑 착용",
-          "안전화 착용",
-          "작업구역 출입통제",
-          "소화기 비치",
-          "안전 감시자 배치",
-        ],
-        riskAssessment: {
-          complexity: 4,
-          scope: 3,
-          frequency: 2,
-          overall: 3,
-          reason: `${data.workType} 작업 특성상 감전 및 낙상 위험이 있으나, 적절한 안전조치 시 위험도 중간 수준으로 관리 가능`,
-        },
-        mitigationMeasures: [
-          "작업 전 안전교육 실시 및 작업절차 숙지",
-          "전원 차단 확인 절차 이중 점검",
-          "작업구역 미끄럼방지 매트 설치 및 정리정돈",
-          "안전 감시자 상시 배치 및 비상연락망 유지",
-          "작업 전후 안전점검 체크리스트 작성",
-        ],
-      };
+  const handleBasicInfoChange = (field: keyof typeof basicInfo, value: string) => {
+    setBasicInfo((prev) => ({ ...prev, [field]: value }));
+  };
 
-      setGeneratedPermit(mockPermit);
-      setIsLoading(false);
+  const handleSafetyToggle = (category: keyof typeof safetyChecks, item: string) => {
+    setSafetyChecks((prev) => ({
+      ...prev,
+      [category]: prev[category].includes(item)
+        ? prev[category].filter((i) => i !== item)
+        : [...prev[category], item],
+    }));
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && !workType) {
       toast({
-        title: "생성 완료",
+        title: "작업 유형을 선택해주세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentStep < 4) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      // TODO: Remove mock functionality - Implement actual submission
+      toast({
+        title: "제출 완료",
         description: "안전작업허가서가 성공적으로 생성되었습니다.",
       });
-    }, 2000);
+      console.log("Submitting:", { workType, basicInfo, safetyChecks });
+      setLocation("/");
+    }
   };
 
-  const handleReset = () => {
-    setGeneratedPermit(null);
-    toast({
-      title: "초기화 완료",
-      description: "새로운 허가서를 작성할 수 있습니다.",
-    });
+  const handlePrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
   };
 
-  const handleDownload = () => {
-    // TODO: Remove mock functionality - Implement actual PDF generation
-    toast({
-      title: "다운로드 준비",
-      description: "PDF 다운로드 기능은 곧 제공될 예정입니다.",
-    });
-    console.log("Download PDF");
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <Step1WorkTypeSelection selectedType={workType} onSelect={setWorkType} />;
+      case 2:
+        return <Step2BasicInfo data={basicInfo} onChange={handleBasicInfoChange} />;
+      case 3:
+        return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} />;
+      case 4:
+        return (
+          <Step5Review
+            data={{
+              workType,
+              workName: basicInfo.workName,
+              workArea: basicInfo.workArea,
+              workerName: basicInfo.workerName,
+              department: basicInfo.department,
+              workStartDate: basicInfo.workStartDate,
+              workEndDate: basicInfo.workEndDate,
+              riskScore: `${safetyChecks.requirements1.length + safetyChecks.requirements2.length}/28 항목`,
+              alerts: [
+                "광양 4열연공장 개구부 덮어짐",
+                "광양 압연실비나부 관3열연공장 차단기 인출 후 단독으로 절차 작업 중 아크 화상",
+              ],
+            }}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="text-create-title">새 허가서 작성</h1>
-        <p className="text-muted-foreground mt-1">작업 정보를 입력하고 안전작업허가서를 생성하세요</p>
+        <h1 className="text-3xl font-bold" data-testid="text-create-title">
+          새 안전작업허가서 작성
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          필수 정보를 입력하고 안전 점검 사항을 확인하세요
+        </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div>
-          <PermitInputForm onSubmit={handleSubmit} isLoading={isLoading} />
-        </div>
+      <StepIndicator steps={steps} currentStep={currentStep} />
 
-        <div>
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : generatedPermit ? (
-            <PermitOutput
-              permit={generatedPermit}
-              onReset={handleReset}
-              onDownload={handleDownload}
-            />
-          ) : (
-            <EmptyState />
-          )}
-        </div>
+      <div className="min-h-[500px]">{renderStep()}</div>
+
+      <div className="flex items-center justify-between pt-6 border-t">
+        <Button
+          variant="outline"
+          onClick={handlePrev}
+          disabled={currentStep === 1}
+          data-testid="button-prev"
+        >
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          이전
+        </Button>
+
+        <Button onClick={handleNext} data-testid="button-next">
+          {currentStep === 4 ? "제출하기" : "다음"}
+          {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+        </Button>
       </div>
     </div>
   );
