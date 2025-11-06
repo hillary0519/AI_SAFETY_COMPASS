@@ -149,15 +149,15 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">안전 점검 사항</h2>
-        <p className="text-muted-foreground">모든 안전 점검 항목을 확인하세요</p>
+        <h2 className="text-2xl font-bold mb-2">✅ 안전 점검 사항</h2>
+        <p className="text-muted-foreground">🦺 모든 안전 점검 항목을 확인하세요</p>
       </div>
 
       <Card className="border-destructive/50 bg-destructive/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            위험포인트
+            ⚠️ 위험포인트
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
@@ -277,7 +277,7 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>작업절차 (위험성평가)</CardTitle>
+          <CardTitle>📊 작업절차 (위험성평가)</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>

@@ -9,33 +9,38 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, FileText, Clock, CheckCircle, BarChart3, Shield, Plus } from "lucide-react";
+import { LayoutDashboard, FileText, Clock, CheckCircle, BarChart3, Shield, Plus, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
-    title: "대시보드",
+    title: "🏠 대시보드",
     url: "/",
     icon: LayoutDashboard,
   },
   {
-    title: "내 허가서",
+    title: "📋 내 허가서",
     url: "/my-permits",
     icon: FileText,
   },
   {
-    title: "승인 대기",
+    title: "⏰ 승인 대기",
     url: "/pending",
     icon: Clock,
   },
   {
-    title: "전체 허가서",
+    title: "✅ 전체 허가서",
     url: "/all-permits",
     icon: CheckCircle,
   },
   {
-    title: "통계",
+    title: "🤖 사고사례 모음집",
+    url: "/accident-cases",
+    icon: MessageSquare,
+  },
+  {
+    title: "📊 통계",
     url: "/statistics",
     icon: BarChart3,
   },
@@ -52,7 +57,7 @@ export function AppSidebar() {
             <Shield className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-bold text-base" data-testid="text-sidebar-title">안전작업허가</h2>
+            <h2 className="font-bold text-base" data-testid="text-sidebar-title">🦺 안전작업허가</h2>
             <p className="text-xs text-muted-foreground">Safety Permit</p>
           </div>
         </div>
@@ -82,7 +87,7 @@ export function AppSidebar() {
         <Link href="/create">
           <Button className="w-full" data-testid="button-sidebar-create">
             <Plus className="w-4 h-4 mr-2" />
-            새 허가서 작성
+            ➕ 새 허가서 작성
           </Button>
         </Link>
       </SidebarFooter>

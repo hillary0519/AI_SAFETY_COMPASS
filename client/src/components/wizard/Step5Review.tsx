@@ -57,8 +57,8 @@ export default function Step5Review({ data }: Step5Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">검토 및 제출</h2>
-        <p className="text-muted-foreground">입력한 정보를 최종 확인하세요</p>
+        <h2 className="text-2xl font-bold mb-2">📋 검토 및 제출</h2>
+        <p className="text-muted-foreground">✅ 입력한 정보를 최종 확인하세요</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
