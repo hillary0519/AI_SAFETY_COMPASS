@@ -108,9 +108,9 @@ export default function AccidentCases() {
         </div>
       </div>
 
-      <Card className="flex-1 flex flex-col overflow-hidden">
-        <CardContent className="flex-1 flex flex-col p-0">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <Card className="flex-1 flex flex-col">
+        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+          <div className="flex-1 overflow-y-scroll p-6 space-y-4" style={{ scrollbarGutter: 'stable' }} data-testid="chat-messages-container">
             {messages.map((message) => (
               <div
                 key={message.id}
