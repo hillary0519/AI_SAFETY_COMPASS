@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, FileText } from "lucide-react";
+import { useState } from "react";
+import AccidentCaseDialog from "@/components/AccidentCaseDialog";
 
 interface ReviewData {
   workType: string;
@@ -17,7 +19,23 @@ interface Step5Props {
   data: ReviewData;
 }
 
+const accidentCases = [
+  {
+    id: 1,
+    title: "센서 교체시 감전사고",
+    fileName: "파일명 #1: 센서 교체시 감전사고",
+  },
+  {
+    id: 2,
+    title: "센서 교체시 밀폐공간 질식사고",
+    fileName: "파일명 #2: 센서 교체시 밀폐공간 질식사고",
+  },
+];
+
 export default function Step5Review({ data }: Step5Props) {
+  const [selectedCase, setSelectedCase] = useState<string | null>(null);
+  const [caseDialogOpen, setCaseDialogOpen] = useState(false);
+
   const formatDateTime = (datetime: string) => {
     if (!datetime) return "○ ○ ○";
     const date = new Date(datetime);
@@ -29,6 +47,11 @@ export default function Step5Review({ data }: Step5Props) {
       minute: "2-digit",
       hour12: false,
     });
+  };
+
+  const handleCaseClick = (caseTitle: string) => {
+    setSelectedCase(caseTitle);
+    setCaseDialogOpen(true);
   };
 
   return (
@@ -101,6 +124,36 @@ export default function Step5Review({ data }: Step5Props) {
           </CardContent>
         </Card>
       )}
+
+      <Card className="max-w-3xl">
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            <p className="font-semibold flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              🔹 안전사고 사례
+            </p>
+            <div className="space-y-2 pl-6">
+              {accidentCases.map((accidentCase) => (
+                <div key={accidentCase.id}>
+                  <button
+                    onClick={() => handleCaseClick(accidentCase.title)}
+                    className="text-sm text-primary hover:underline cursor-pointer text-left"
+                    data-testid={`link-accident-case-${accidentCase.id}`}
+                  >
+                    • {accidentCase.fileName}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AccidentCaseDialog
+        open={caseDialogOpen}
+        onOpenChange={setCaseDialogOpen}
+        caseTitle={selectedCase || ""}
+      />
     </div>
   );
 }

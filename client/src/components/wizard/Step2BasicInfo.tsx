@@ -35,9 +35,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
       <div className="space-y-4 max-w-3xl">
         <div className="space-y-2">
-          <Label htmlFor="workName">
-            작업명 <span className="text-destructive">*</span>
-          </Label>
+          <Label htmlFor="workName">작업명</Label>
           <Input
             id="workName"
             placeholder="예: 냉각탑 점검 작업"
@@ -49,9 +47,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="workArea">
-              작업 위치 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="workArea">작업 위치</Label>
             <Input
               id="workArea"
               placeholder="예: 3공장 옥상"
@@ -62,9 +58,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="equipmentName">
-              설비명 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="equipmentName">설비명</Label>
             <Input
               id="equipmentName"
               placeholder="예: Conveyor PX-007"
@@ -77,9 +71,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="workerName">
-              작업지명 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="workerName">작업지명</Label>
             <Input
               id="workerName"
               placeholder="예: 김철수"
@@ -90,9 +82,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="department">
-              부서 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="department">부서</Label>
             <Input
               id="department"
               placeholder="예: 시설팀"
@@ -105,9 +95,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="workStartDate">
-              작업 시작 일시 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="workStartDate">작업 시작 일시</Label>
             <Input
               id="workStartDate"
               type="datetime-local"
@@ -118,9 +106,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="workEndDate">
-              작업 종료 일시 <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="workEndDate">작업 종료 일시</Label>
             <Input
               id="workEndDate"
               type="datetime-local"
@@ -132,9 +118,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="workDescription">
-            작업 내용 <span className="text-destructive">*</span>
-          </Label>
+          <Label htmlFor="workDescription">작업 내용</Label>
           <Textarea
             id="workDescription"
             placeholder="작업 내용을 상세히 설명해주세요"

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import StepIndicator from "@/components/StepIndicator";
 import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
@@ -9,6 +9,7 @@ import Step5Review from "@/components/wizard/Step5Review";
 import SignatureDialog from "@/components/SignatureDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
 
 const steps = [
   { number: 1, title: "작업 유형 선택" },
@@ -17,11 +18,14 @@ const steps = [
   { number: 4, title: "검토 및 제출" },
 ];
 
+const DRAFT_STORAGE_KEY = "permit_draft";
+
 export default function CreatePermit() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [signatureOpen, setSignatureOpen] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
 
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [basicInfo, setBasicInfo] = useState({
@@ -40,6 +44,65 @@ export default function CreatePermit() {
     equipment: [] as string[],
     protective: [] as string[],
   });
+
+  // 임시저장 불러오기
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      setHasDraft(true);
+    }
+  }, []);
+
+  // 자동 임시저장 (변경사항이 있을 때마다)
+  useEffect(() => {
+    const draftData = {
+      currentStep,
+      workTypes,
+      basicInfo,
+      safetyChecks,
+      timestamp: new Date().toISOString(),
+    };
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+  }, [currentStep, workTypes, basicInfo, safetyChecks]);
+
+  const loadDraft = () => {
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      const draft = JSON.parse(savedDraft);
+      setCurrentStep(draft.currentStep || 1);
+      setWorkTypes(draft.workTypes || []);
+      setBasicInfo(draft.basicInfo || {
+        workName: "",
+        workArea: "",
+        equipmentName: "",
+        workerName: "",
+        department: "",
+        workStartDate: "",
+        workEndDate: "",
+        workDescription: "",
+      });
+      setSafetyChecks(draft.safetyChecks || {
+        requirements1: [],
+        requirements2: [],
+        equipment: [],
+        protective: [],
+      });
+      setHasDraft(false);
+      toast({
+        title: "임시저장본 불러오기",
+        description: "저장된 작업을 불러왔습니다.",
+      });
+    }
+  };
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setHasDraft(false);
+    toast({
+      title: "새로 작성",
+      description: "새로운 허가서를 작성합니다.",
+    });
+  };
 
   const handleWorkTypeToggle = (type: string) => {
     setWorkTypes((prev) =>
@@ -87,6 +150,7 @@ export default function CreatePermit() {
   };
 
   const handleSubmit = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
     toast({
       title: "제출 완료",
       description: "안전작업허가서가 성공적으로 생성되었습니다.",
@@ -142,14 +206,55 @@ export default function CreatePermit() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold" data-testid="text-create-title">
-          새 안전작업허가서 작성
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          필수 정보를 입력하고 안전 점검 사항을 확인하세요
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold" data-testid="text-create-title">
+            새 안전작업허가서 작성
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            필수 정보를 입력하고 안전 점검 사항을 확인하세요
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled
+            data-testid="button-auto-save"
+          >
+            <Save className="w-4 h-4" />
+            자동 저장됨
+          </Button>
+        </div>
       </div>
+
+      {hasDraft && (
+        <Card className="border-primary bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">작성 중인 임시저장본이 있습니다.</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearDraft}
+                  data-testid="button-clear-draft"
+                >
+                  새로 작성
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={loadDraft}
+                  data-testid="button-load-draft"
+                >
+                  이어서 작성
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <StepIndicator steps={steps} currentStep={currentStep} />
 

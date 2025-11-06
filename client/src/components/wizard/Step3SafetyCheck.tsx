@@ -59,7 +59,7 @@ const protective = [
   "방진마스크",
   "절연장화",
   "절연장갑",
-  "절연장화",
+  "안전대",
 ];
 
 const riskAssessments = [
