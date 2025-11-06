@@ -113,7 +113,7 @@ export default function AccidentCaseDialog({
           <div className="space-y-2">
             <h3 className="font-bold text-base">발생 원인</h3>
             <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-lg">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap text-destructive-foreground">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap text-destructive">
                 {accidentCase.발생원인}
               </p>
             </div>

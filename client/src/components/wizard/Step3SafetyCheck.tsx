@@ -171,8 +171,9 @@ const riskAssessments = [
 export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
   const [useAfter, setUseAfter] = useState(false);
 
-  // Calculate max R value
-  const maxR = Math.max(...riskAssessments.map(item => item.r));
+  // Calculate max R value for before and after
+  const maxRBefore = Math.max(...riskAssessments.map(item => item.r));
+  const maxRAfter = Math.max(...riskAssessments.map(item => Math.round(item.r * 1.2 * 10) / 10));
   
   // Calculate risk scores
   const baseScore = riskAssessments.reduce((sum, item) => sum + item.r, 0);
@@ -351,7 +352,8 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
             <TableBody>
               {riskAssessments.map((item) => {
                 const rValue = useAfter ? Math.round(item.r * 1.2 * 10) / 10 : item.r;
-                const isMaxR = item.r === maxR;
+                const maxR = useAfter ? maxRAfter : maxRBefore;
+                const isMaxR = rValue === maxR;
                 
                 return (
                   <TableRow key={item.id}>
@@ -361,7 +363,7 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
                     <TableCell>{item.accident}</TableCell>
                     <TableCell className="text-center font-semibold">{item.f}</TableCell>
                     <TableCell className="text-center font-semibold">{item.c}</TableCell>
-                    <TableCell className={`text-center font-semibold ${isMaxR && !useAfter ? 'text-destructive' : ''}`}>
+                    <TableCell className={`text-center font-semibold ${isMaxR ? 'text-destructive' : ''}`}>
                       {rValue}
                     </TableCell>
                     <TableCell>{item.mitigation}</TableCell>
