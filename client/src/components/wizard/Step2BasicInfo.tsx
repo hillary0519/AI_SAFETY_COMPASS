@@ -29,8 +29,8 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">📝 기본 정보 입력</h2>
-        <p className="text-muted-foreground">✏️ 작업에 대한 상세 정보를 입력하세요</p>
+        <h2 className="text-2xl font-bold mb-2">기본 정보 입력</h2>
+        <p className="text-muted-foreground">작업에 대한 상세 정보를 입력하세요</p>
       </div>
 
       <div className="space-y-4 max-w-3xl">
@@ -131,13 +131,12 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
 
         <div className="pt-4">
           <Button
-            variant="outline"
-            className="w-full"
+            className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 text-white"
             onClick={() => setCompassOpen(true)}
             data-testid="button-safety-compass"
           >
-            <Compass className="w-4 h-4 mr-2" />
-            🧭 Safety Compass
+            <Compass className="w-6 h-6 mr-2" />
+            Safety Compass
           </Button>
         </div>
       </div>

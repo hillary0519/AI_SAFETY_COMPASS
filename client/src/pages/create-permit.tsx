@@ -12,10 +12,10 @@ import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 
 const steps = [
-  { number: 1, title: "🦺 작업 유형 선택" },
-  { number: 2, title: "📝 기본 정보" },
-  { number: 3, title: "✅ 안전 점검" },
-  { number: 4, title: "📋 검토 및 제출" },
+  { number: 1, title: "작업 유형 선택" },
+  { number: 2, title: "기본 정보" },
+  { number: 3, title: "안전 점검" },
+  { number: 4, title: "검토 및 제출" },
 ];
 
 const DRAFT_STORAGE_KEY = "permit_draft";
@@ -209,10 +209,10 @@ export default function CreatePermit() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-create-title">
-            📝 새 안전작업허가서 작성
+            새 안전작업허가서 작성
           </h1>
           <p className="text-muted-foreground mt-1">
-            ✅ 필수 정보를 입력하고 안전 점검 사항을 확인하세요
+            필수 정보를 입력하고 안전 점검 사항을 확인하세요
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -233,7 +233,7 @@ export default function CreatePermit() {
         <Card className="border-primary bg-primary/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">💾 작성 중인 임시저장본이 있습니다.</p>
+              <p className="text-sm font-medium">작성 중인 임시저장본이 있습니다.</p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
