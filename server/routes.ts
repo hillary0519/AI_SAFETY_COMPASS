@@ -73,6 +73,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear all permits endpoint
+  app.delete("/api/permits/clear", async (req, res) => {
+    try {
+      await storage.clearAllPermits();
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Clear permits error:", error);
+      res.status(500).json({ error: "Failed to clear permits" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

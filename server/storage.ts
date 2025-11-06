@@ -10,6 +10,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   createPermit(permit: Partial<InsertWorkPermit>): Promise<WorkPermit>;
   getPermits(status?: string): Promise<WorkPermit[]>;
+  clearAllPermits(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -76,6 +77,10 @@ export class MemStorage implements IStorage {
       return allPermits.filter(p => p.status === status);
     }
     return allPermits;
+  }
+
+  async clearAllPermits(): Promise<void> {
+    this.permits.clear();
   }
 }
 

@@ -5,8 +5,7 @@ import StepIndicator from "@/components/StepIndicator";
 import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
 import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
-import Step4RiskAssessment from "@/components/wizard/Step4RiskAssessment";
-import Step5Review from "@/components/wizard/Step5Review";
+import Step4Review from "@/components/wizard/Step5Review";
 import VOCDialog from "@/components/VOCDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -17,8 +16,7 @@ const steps = [
   { number: 1, title: "작업 유형 선택" },
   { number: 2, title: "기본 정보" },
   { number: 3, title: "안전 점검" },
-  { number: 4, title: "위험성 평가" },
-  { number: 5, title: "검토 및 제출" },
+  { number: 4, title: "검토 및 제출" },
 ];
 
 const DRAFT_STORAGE_KEY = "permit_draft";
@@ -43,10 +41,10 @@ export default function CreatePermit() {
     workDescription: "",
   });
   const [safetyChecks, setSafetyChecks] = useState({
-    requirements1: [] as string[],
-    requirements2: [] as string[],
-    equipment: [] as string[],
-    protective: [] as string[],
+    requirements1: ["산소/유해/가연성 가스 측정", "송배풍기 설치", "전기차단/표시부착", "작업구역 표시"] as string[],
+    requirements2: ["작업감시자 배치(화기/밀폐)"] as string[],
+    equipment: ["안전보호구"] as string[],
+    protective: ["안전모/안전화", "보안경"] as string[],
   });
 
   // 임시저장 불러오기
@@ -86,10 +84,10 @@ export default function CreatePermit() {
         workDescription: "",
       });
       setSafetyChecks(draft.safetyChecks || {
-        requirements1: [],
-        requirements2: [],
-        equipment: [],
-        protective: [],
+        requirements1: ["산소/유해/가연성 가스 측정", "송배풍기 설치", "전기차단/표시부착", "작업구역 표시"],
+        requirements2: ["작업감시자 배치(화기/밀폐)"],
+        equipment: ["안전보호구"],
+        protective: ["안전모/안전화", "보안경"],
       });
       setHasDraft(false);
       toast({
@@ -143,10 +141,10 @@ export default function CreatePermit() {
       return;
     }
 
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Step 5: Check if all cases have been viewed
+      // Step 4: Check if all cases have been viewed
       if (!casesViewedAll) {
         toast({
           title: "안전사고 사례를 모두 확인해주세요",
@@ -230,10 +228,8 @@ export default function CreatePermit() {
       case 3:
         return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} />;
       case 4:
-        return <Step4RiskAssessment />;
-      case 5:
         return (
-          <Step5Review
+          <Step4Review
             data={{
               workType: workTypes.join(", "),
               workName: basicInfo.workName,
@@ -334,8 +330,8 @@ export default function CreatePermit() {
 
           {currentStep !== 2 && (
             <Button onClick={handleNext} data-testid="button-next">
-              {currentStep === 5 ? "제출하기" : "다음"}
-              {currentStep < 5 && <ChevronRight className="w-4 h-4 ml-2" />}
+              {currentStep === 4 ? "제출하기" : "다음"}
+              {currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
             </Button>
           )}
         </div>
