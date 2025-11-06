@@ -70,7 +70,21 @@ State is persisted to localStorage as draft data to prevent data loss.
 
 ### AI-Powered Features
 
-**Accident Case Chatbot**: Uses conversational AI to help users search historical accident cases and get safety recommendations based on work context. Mock accident database includes cases like sensor replacement electrocution, confined space asphyxiation, and fall accidents.
+**RAG-Based Accident Case Recommendations**: The system uses Retrieval-Augmented Generation (RAG) with FAISS vector similarity search to find and recommend relevant historical accident cases from an Excel database (`attached_assets/accident_List3_1762451020150.xlsx` containing 30 real accident cases from Korean manufacturing facilities).
+
+Implementation details:
+- **Vector Database**: FAISS (Facebook AI Similarity Search) with IndexFlatL2 for L2 distance similarity
+- **Embedding Model**: OpenAI's text-embedding-3-small for converting accident cases and work permit information into vector embeddings
+- **Data Source**: Excel file with columns: 작업유형, 기인물, 설비명, 재해발생일, 시간, 재해유형, 사고명, 나이, 근속, 재해정도, 발생상황, 발생원인, 시사점
+- **Initialization**: Lazy loading on first API request; embeddings cached in memory for subsequent requests
+- **API Endpoints**: 
+  - `POST /api/accident-cases/similar` - Returns 2 most similar cases based on work type, name, description, and equipment
+  - `GET /api/accident-cases/:id` - Returns specific case details
+- **Concurrent Protection**: Initialization promise guards against redundant embedding work under concurrent requests
+- **UI Integration**: Similar cases displayed in Step 4 (Review) with clickable titles opening detailed popup dialogs
+- **Error Handling**: Graceful degradation when no similar cases found or API errors occur; users can proceed with submission
+
+**Accident Case Chatbot**: Uses conversational AI to help users search historical accident cases and get safety recommendations based on work context.
 
 **Work Permit Generation**: AI analyzes input work details and generates:
 - Step-by-step procedures
@@ -93,9 +107,12 @@ Custom theming using CSS variables in `client/src/index.css`:
 
 ### Third-Party Services
 
-**AI Service**: Replit AI Integrations (OpenAI-compatible API)
-- Base URL and API key configured via environment variables
-- Used for chatbot responses and work permit content generation
+**AI Service**: OpenAI API
+- API key stored in Replit Secrets as `OPENAI_API_KEY`
+- Used for:
+  - Chatbot responses and work permit content generation
+  - Text embeddings for RAG-based accident case similarity search (text-embedding-3-small model)
+  - Vector similarity matching with FAISS for relevant case recommendations
 
 **Database**: PostgreSQL (via Neon serverless when configured)
 - Connection string via `DATABASE_URL` environment variable
@@ -118,6 +135,11 @@ Custom theming using CSS variables in `client/src/index.css`:
 **Data Fetching**:
 - `@tanstack/react-query` - Server state management
 - `wouter` - Client-side routing
+
+**AI & Vector Search**:
+- `@langchain/openai` - OpenAI embeddings integration
+- `faiss-node` - FAISS vector similarity search library
+- `xlsx` - Excel file parsing for accident case data
 
 **Database**:
 - `drizzle-orm` - TypeScript ORM

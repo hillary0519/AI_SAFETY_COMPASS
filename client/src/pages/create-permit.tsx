@@ -232,22 +232,22 @@ export default function CreatePermit() {
           <Step4Review
             data={{
               workType: workTypes.join(", "),
+              workTypes: workTypes,
               workName: basicInfo.workName,
               workArea: basicInfo.workArea,
+              equipmentName: basicInfo.equipmentName,
               workerName: basicInfo.workerName,
               department: basicInfo.department,
               workStartDate: basicInfo.workStartDate,
               workEndDate: basicInfo.workEndDate,
+              workDescription: basicInfo.workDescription,
               riskScore: `${
                 safetyChecks.requirements1.length +
                 safetyChecks.requirements2.length +
                 safetyChecks.equipment.length +
                 safetyChecks.protective.length
               }/28 항목`,
-              alerts: [
-                "광양 4열연공장 개구부 덮어짐",
-                "광양 압연실비나부 관3열연공장 차단기 인출 후 단독으로 절차 작업 중 아크 화상",
-              ],
+              alerts: [],
             }}
             onCasesViewed={setCasesViewedAll}
           />

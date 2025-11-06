@@ -1,16 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, FileText } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 import AccidentCaseDialog from "@/components/AccidentCaseDialog";
+import { useQuery } from "@tanstack/react-query";
+
+interface AccidentCase {
+  id: number;
+  작업유형: string;
+  기인물: string;
+  설비명: string;
+  재해발생일: string;
+  시간: string;
+  재해유형: string;
+  사고명: string;
+  나이: string;
+  근속: string;
+  재해정도: string;
+  발생상황: string;
+  발생원인: string;
+  시사점: string;
+}
 
 interface ReviewData {
   workType: string;
+  workTypes: string[];
   workName: string;
   workArea: string;
+  equipmentName: string;
   workerName: string;
   department: string;
   workStartDate: string;
   workEndDate: string;
+  workDescription: string;
   riskScore: string;
   alerts: string[];
 }
@@ -20,23 +41,39 @@ interface Step5Props {
   onCasesViewed: (viewedAll: boolean) => void;
 }
 
-const accidentCases = [
-  {
-    id: 1,
-    title: "센서 교체시 감전사고",
-    fileName: "파일명 #1: 센서 교체시 감전사고",
-  },
-  {
-    id: 2,
-    title: "센서 교체시 밀폐공간 질식사고",
-    fileName: "파일명 #2: 센서 교체시 밀폐공간 질식사고",
-  },
-];
-
 export default function Step5Review({ data, onCasesViewed }: Step5Props) {
-  const [selectedCase, setSelectedCase] = useState<string | null>(null);
+  const [selectedCase, setSelectedCase] = useState<AccidentCase | null>(null);
   const [caseDialogOpen, setCaseDialogOpen] = useState(false);
   const [viewedCases, setViewedCases] = useState<Set<number>>(new Set());
+
+  // Fetch similar accident cases using RAG
+  const { data: similarCases = [], isLoading, isError } = useQuery<AccidentCase[]>({
+    queryKey: ['/api/accident-cases/similar', data.workTypes, data.workName],
+    queryFn: async () => {
+      const response = await fetch('/api/accident-cases/similar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workTypes: data.workTypes || [],
+          workName: data.workName || '',
+          workDescription: data.workDescription || '',
+          equipmentName: data.equipmentName || '',
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch similar cases');
+      }
+      return response.json();
+    },
+    enabled: data.workTypes && data.workTypes.length > 0,
+  });
+
+  // Auto-mark as viewed when no cases are found or error occurs
+  useEffect(() => {
+    if (!isLoading && (similarCases.length === 0 || isError)) {
+      onCasesViewed(true);
+    }
+  }, [isLoading, similarCases.length, isError, onCasesViewed]);
 
   const formatDateTime = (datetime: string) => {
     if (!datetime) return "○ ○ ○";
@@ -51,16 +88,16 @@ export default function Step5Review({ data, onCasesViewed }: Step5Props) {
     });
   };
 
-  const handleCaseClick = (caseId: number, caseTitle: string) => {
-    setSelectedCase(caseTitle);
+  const handleCaseClick = (accidentCase: AccidentCase) => {
+    setSelectedCase(accidentCase);
     setCaseDialogOpen(true);
     
     const newViewedCases = new Set(viewedCases);
-    newViewedCases.add(caseId);
+    newViewedCases.add(accidentCase.id);
     setViewedCases(newViewedCases);
     
     // Check if all cases have been viewed
-    onCasesViewed(newViewedCases.size === accidentCases.length);
+    onCasesViewed(newViewedCases.size === similarCases.length);
   };
 
   return (
@@ -88,7 +125,7 @@ export default function Step5Review({ data, onCasesViewed }: Step5Props) {
 
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">설비명</p>
-          <p className="font-semibold" data-testid="review-equipment">○ ○ ○</p>
+          <p className="font-semibold" data-testid="review-equipment">{data.equipmentName || "○ ○ ○"}</p>
         </div>
 
         <div className="space-y-2">
@@ -116,39 +153,64 @@ export default function Step5Review({ data, onCasesViewed }: Step5Props) {
         <p className="text-sm font-medium">안전 점검 항목: {data.riskScore}</p>
       </div>
 
-      {data.alerts.length > 0 && (
-        <Card className="border-destructive/50 bg-destructive/5 max-w-3xl">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-              <div className="space-y-2 w-full">
-                <p className="font-semibold text-destructive">추천 안전사고 사례</p>
-                <div className="space-y-2 pl-4">
-                  {accidentCases.map((accidentCase, index) => (
-                    <div key={accidentCase.id}>
+      {/* Similar Accident Cases */}
+      <Card className="border-destructive/50 bg-destructive/5 max-w-3xl">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+            <div className="space-y-3 w-full">
+              <p className="font-semibold text-destructive">추천 안전사고 사례</p>
+              
+              {isLoading ? (
+                <div className="text-sm text-muted-foreground">유사 사고 사례를 검색 중입니다...</div>
+              ) : isError ? (
+                <div className="text-sm text-destructive">
+                  사고 사례를 불러오는 중 오류가 발생했습니다. 계속 진행하실 수 있습니다.
+                </div>
+              ) : similarCases.length > 0 ? (
+                <div className="space-y-2">
+                  {similarCases.map((accidentCase) => (
+                    <div 
+                      key={accidentCase.id} 
+                      className="border border-destructive/30 rounded-md p-3 bg-background hover-elevate"
+                      data-testid={`accident-case-${accidentCase.id}`}
+                    >
                       <button
-                        onClick={() => handleCaseClick(accidentCase.id, accidentCase.title)}
-                        className="text-sm text-primary hover:underline cursor-pointer text-left"
+                        onClick={() => handleCaseClick(accidentCase)}
+                        className="text-left w-full"
                         data-testid={`link-accident-case-${accidentCase.id}`}
                       >
-                        • {accidentCase.fileName}
-                        {viewedCases.has(accidentCase.id) && (
-                          <span className="ml-2 text-green-600">✓</span>
-                        )}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-destructive hover:underline">
+                              {accidentCase.사고명}
+                              {viewedCases.has(accidentCase.id) && (
+                                <span className="ml-2 text-green-600">✓</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {accidentCase.재해유형} • {accidentCase.재해정도} • {accidentCase.재해발생일}
+                            </p>
+                          </div>
+                        </div>
                       </button>
                     </div>
                   ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  이 작업과 유사한 사고 사례를 찾을 수 없습니다. 계속 진행하실 수 있습니다.
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
 
       <AccidentCaseDialog
         open={caseDialogOpen}
         onOpenChange={setCaseDialogOpen}
-        caseTitle={selectedCase || ""}
+        accidentCase={selectedCase}
       />
     </div>
   );
