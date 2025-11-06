@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/permits", async (req, res) => {
     try {
       const {
-        workTypes,
+        workType,
         workName,
         workArea,
         equipmentName,
@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } = req.body;
 
       const permit = await storage.createPermit({
-        workType: workTypes,
+        workType,
         workName,
         workArea,
         equipmentName,

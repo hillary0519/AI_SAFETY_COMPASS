@@ -11,15 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
-interface Permit {
-  id: string;
-  workType: string;
-  workName: string;
-  workArea: string;
-  workerName: string;
-  status: string;
-}
+import type { WorkPermit } from "@shared/schema";
 
 const statusColors: Record<string, string> = {
   pending: "승인 대기",
@@ -28,7 +20,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function RecentPermitsTable() {
-  const { data: permits, isLoading } = useQuery<Permit[]>({
+  const { data: permits, isLoading } = useQuery<WorkPermit[]>({
     queryKey: ['/api/permits'],
     queryFn: async () => {
       const response = await fetch('/api/permits');

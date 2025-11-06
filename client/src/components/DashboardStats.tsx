@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, FileText, CheckCircle, XCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { WorkPermit } from "@shared/schema";
 
 interface StatCardProps {
   title: string;
@@ -27,29 +29,42 @@ function StatCard({ title, value, icon, bgColor }: StatCardProps) {
 }
 
 export default function DashboardStats() {
-  // TODO: Remove mock data - Replace with actual data from API
+  const { data: permits } = useQuery<WorkPermit[]>({
+    queryKey: ['/api/permits'],
+    queryFn: async () => {
+      const response = await fetch('/api/permits');
+      if (!response.ok) throw new Error('Failed to fetch permits');
+      return response.json();
+    },
+  });
+
+  const pendingCount = permits?.filter(p => p.status === 'pending').length || 0;
+  const totalCount = permits?.length || 0;
+  const approvedCount = permits?.filter(p => p.status === 'approved').length || 0;
+  const rejectedCount = permits?.filter(p => p.status === 'rejected').length || 0;
+
   const stats = [
     {
       title: "승인대기",
-      value: 0,
+      value: pendingCount,
       icon: <Clock className="w-6 h-6 text-chart-3" />,
       bgColor: "bg-chart-3/10",
     },
     {
-      title: "진행중인 작업",
-      value: 0,
+      title: "총 허가서",
+      value: totalCount,
       icon: <FileText className="w-6 h-6 text-primary" />,
       bgColor: "bg-primary/10",
     },
     {
-      title: "이번 달 완료",
-      value: 0,
+      title: "승인됨",
+      value: approvedCount,
       icon: <CheckCircle className="w-6 h-6 text-chart-2" />,
       bgColor: "bg-chart-2/10",
     },
     {
       title: "반려됨",
-      value: 0,
+      value: rejectedCount,
       icon: <XCircle className="w-6 h-6 text-destructive" />,
       bgColor: "bg-destructive/10",
     },

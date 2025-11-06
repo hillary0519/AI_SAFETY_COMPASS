@@ -11,6 +11,7 @@ import VOCDialog from "@/components/VOCDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import { queryClient } from "@/lib/queryClient";
 
 const steps = [
   { number: 1, title: "작업 유형 선택" },
@@ -174,7 +175,7 @@ export default function CreatePermit() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          workTypes: workTypes.join(", "),
+          workType: workTypes.join(", "),
           workName: basicInfo.workName,
           workArea: basicInfo.workArea,
           equipmentName: basicInfo.equipmentName,
@@ -194,6 +195,10 @@ export default function CreatePermit() {
       }
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
+      
+      // Invalidate permits query to refresh dashboard
+      queryClient.invalidateQueries({ queryKey: ['/api/permits'] });
+      
       toast({
         title: "제출 완료",
         description: "안전작업허가서가 성공적으로 생성되었습니다.",
