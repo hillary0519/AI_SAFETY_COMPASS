@@ -6,6 +6,7 @@ import Step1WorkTypeSelection from "@/components/wizard/Step1WorkTypeSelection";
 import Step2BasicInfo from "@/components/wizard/Step2BasicInfo";
 import Step3SafetyCheck from "@/components/wizard/Step3SafetyCheck";
 import Step4Review from "@/components/wizard/Step5Review";
+import SignatureDialog from "@/components/SignatureDialog";
 import VOCDialog from "@/components/VOCDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -27,7 +28,9 @@ export default function CreatePermit() {
   const { toast } = useToast();
   const [hasDraft, setHasDraft] = useState(false);
   const [casesViewedAll, setCasesViewedAll] = useState(false);
+  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [vocDialogOpen, setVocDialogOpen] = useState(false);
+  const [signatureData, setSignatureData] = useState<string>("");
 
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [basicInfo, setBasicInfo] = useState({
@@ -128,6 +131,10 @@ export default function CreatePermit() {
   const handleCompassNext = (addConfinedSpace: boolean) => {
     if (addConfinedSpace && !workTypes.includes("밀폐공간작업")) {
       setWorkTypes((prev) => [...prev, "밀폐공간작업"]);
+      toast({
+        title: "작업유형에 '밀폐공간작업'을 추가했습니다.",
+        className: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
+      });
     }
     setCurrentStep(3);
   };
@@ -153,9 +160,15 @@ export default function CreatePermit() {
         });
         return;
       }
-      // Open VOC dialog instead of signature
-      setVocDialogOpen(true);
+      // Open signature dialog first
+      setSignatureDialogOpen(true);
     }
+  };
+
+  const handleSignatureSubmit = (signature: string) => {
+    setSignatureData(signature);
+    // After signature, open VOC dialog
+    setVocDialogOpen(true);
   };
 
   const handlePrev = () => {
@@ -315,7 +328,7 @@ export default function CreatePermit() {
         </Card>
       )}
 
-      <StepIndicator steps={steps} currentStep={currentStep} />
+      <StepIndicator steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
 
       <div className="min-h-[500px]">{renderStep()}</div>
 
@@ -342,6 +355,12 @@ export default function CreatePermit() {
           )}
         </div>
       </div>
+
+      <SignatureDialog
+        open={signatureDialogOpen}
+        onOpenChange={setSignatureDialogOpen}
+        onSubmit={handleSignatureSubmit}
+      />
 
       <VOCDialog
         open={vocDialogOpen}

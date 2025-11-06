@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 interface SignatureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: () => void;
+  onSubmit: (signatureData: string) => void;
 }
 
 export default function SignatureDialog({
@@ -22,20 +22,26 @@ export default function SignatureDialog({
 }: SignatureDialogProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Reset canvas and signature state when dialog opens
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    
+    setHasSignature(false);
   }, [open]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -47,6 +53,7 @@ export default function SignatureDialog({
     if (!ctx) return;
 
     setIsDrawing(true);
+    setHasSignature(true);
     ctx.beginPath();
     ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
@@ -78,10 +85,15 @@ export default function SignatureDialog({
 
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
   };
 
   const handleSubmit = () => {
-    onSubmit();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const signatureData = canvas.toDataURL();
+    onSubmit(signatureData);
     onOpenChange(false);
   };
 
@@ -133,8 +145,12 @@ export default function SignatureDialog({
           >
             취소
           </Button>
-          <Button onClick={handleSubmit} data-testid="button-submit-signature">
-            제출
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!hasSignature}
+            data-testid="button-submit-signature"
+          >
+            다음
           </Button>
         </DialogFooter>
       </DialogContent>

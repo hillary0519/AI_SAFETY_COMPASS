@@ -26,6 +26,17 @@ interface Step2Props {
 export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2Props) {
   const [compassOpen, setCompassOpen] = useState(false);
 
+  // Check if all required fields are filled
+  const isFormComplete = 
+    data.workName.trim() !== "" &&
+    data.workArea.trim() !== "" &&
+    data.equipmentName.trim() !== "" &&
+    data.workerName.trim() !== "" &&
+    data.department.trim() !== "" &&
+    data.workStartDate !== "" &&
+    data.workEndDate !== "" &&
+    data.workDescription.trim() !== "";
+
   return (
     <div className="space-y-6">
       <div>
@@ -133,6 +144,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
           <Button
             className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 text-white"
             onClick={() => setCompassOpen(true)}
+            disabled={!isFormComplete}
             data-testid="button-safety-compass"
           >
             <Compass className="w-8 h-8 mr-3 text-yellow-300" />
