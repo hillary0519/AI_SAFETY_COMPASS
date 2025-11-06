@@ -46,13 +46,6 @@ export default function SafetyCompassDialog({
           </div>
 
           <div>
-            <p className="font-semibold mb-1">ㅇ 기온 특성</p>
-            <p className="text-sm text-muted-foreground pl-4">
-              작업날짜 기준 기온 약 37°C, 온열질환 위험 존재
-            </p>
-          </div>
-
-          <div>
             <p className="font-semibold mb-1">ㅇ 작업자 특성</p>
             <p className="text-sm text-muted-foreground pl-4">
               작업자 '홍길동'은 고혈압 기저질환 보유 → 온열질환 예방 조치 강화 필요
@@ -61,7 +54,7 @@ export default function SafetyCompassDialog({
 
           <div className="bg-muted p-4 rounded-lg mt-6">
             <p className="text-sm text-center">
-              □ 과거이력·설비·기온·건강상태를 기반으로 위험성평가를 수행합니다
+              □ 과거이력·설비·건강상태를 기반으로 위험성평가를 수행합니다
             </p>
           </div>
         </div>
