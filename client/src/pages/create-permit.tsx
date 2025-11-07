@@ -24,6 +24,7 @@ const DRAFT_STORAGE_KEY = "permit_draft";
 
 export default function CreatePermit() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [hasDraft, setHasDraft] = useState(false);
@@ -58,23 +59,38 @@ export default function CreatePermit() {
     }
   }, []);
 
+  // 각 단계의 유효성 변경 시 completedSteps 업데이트
+  useEffect(() => {
+    if (workTypes.length === 0 && completedSteps.includes(1)) {
+      setCompletedSteps(prev => prev.filter(s => s !== 1));
+    }
+  }, [workTypes, completedSteps]);
+
+  useEffect(() => {
+    if (!casesViewedAll && completedSteps.includes(4)) {
+      setCompletedSteps(prev => prev.filter(s => s !== 4));
+    }
+  }, [casesViewedAll, completedSteps]);
+
   // 자동 임시저장 (변경사항이 있을 때마다)
   useEffect(() => {
     const draftData = {
       currentStep,
+      completedSteps,
       workTypes,
       basicInfo,
       safetyChecks,
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
-  }, [currentStep, workTypes, basicInfo, safetyChecks]);
+  }, [currentStep, completedSteps, workTypes, basicInfo, safetyChecks]);
 
   const loadDraft = () => {
     const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
     if (savedDraft) {
       const draft = JSON.parse(savedDraft);
       setCurrentStep(draft.currentStep || 1);
+      setCompletedSteps(draft.completedSteps || []);
       setWorkTypes(draft.workTypes || []);
       setBasicInfo(draft.basicInfo || {
         workName: "",
@@ -128,6 +144,77 @@ export default function CreatePermit() {
     }));
   };
 
+  const isStepValid = (stepNumber: number): boolean => {
+    switch (stepNumber) {
+      case 1:
+        return workTypes.length > 0;
+      case 2:
+        return completedSteps.includes(2);
+      case 3:
+        return true;
+      case 4:
+        return casesViewedAll;
+      default:
+        return false;
+    }
+  };
+
+  const handleStepClick = (stepNumber: number) => {
+    if (stepNumber < currentStep) {
+      setCurrentStep(stepNumber);
+      return;
+    }
+
+    if (stepNumber === currentStep) {
+      return;
+    }
+
+    if (stepNumber > currentStep + 1) {
+      toast({
+        title: "순서대로 진행해주세요",
+        description: "이전 단계를 먼저 완료해야 합니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isStepValid(currentStep)) {
+      switch (currentStep) {
+        case 1:
+          toast({
+            title: "작업 유형을 선택해주세요",
+            variant: "destructive",
+          });
+          break;
+        case 2:
+          toast({
+            title: "Safety Compass를 완료해주세요",
+            description: "2단계에서 Safety Compass를 완료해야 다음 단계로 진행할 수 있습니다.",
+            variant: "destructive",
+          });
+          break;
+        case 3:
+          toast({
+            title: "안전 점검을 완료해주세요",
+            variant: "destructive",
+          });
+          break;
+        case 4:
+          toast({
+            title: "안전사고 사례를 모두 확인해주세요",
+            variant: "destructive",
+          });
+          break;
+      }
+      return;
+    }
+
+    if (!completedSteps.includes(currentStep)) {
+      setCompletedSteps((prev) => [...prev, currentStep]);
+    }
+    setCurrentStep(stepNumber);
+  };
+
   const handleCompassNext = (addConfinedSpace: boolean) => {
     if (addConfinedSpace && !workTypes.includes("밀폐공간작업")) {
       setWorkTypes((prev) => [...prev, "밀폐공간작업"]);
@@ -135,6 +222,9 @@ export default function CreatePermit() {
         title: "작업유형에 '밀폐공간작업'을 추가했습니다.",
         className: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
       });
+    }
+    if (!completedSteps.includes(2)) {
+      setCompletedSteps((prev) => [...prev, 2]);
     }
     setCurrentStep(3);
   };
@@ -146,6 +236,18 @@ export default function CreatePermit() {
         variant: "destructive",
       });
       return;
+    }
+
+    if (currentStep === 1) {
+      if (!completedSteps.includes(1)) {
+        setCompletedSteps((prev) => [...prev, 1]);
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!completedSteps.includes(3)) {
+        setCompletedSteps((prev) => [...prev, 3]);
+      }
     }
 
     if (currentStep < 4) {
@@ -328,7 +430,12 @@ export default function CreatePermit() {
         </Card>
       )}
 
-      <StepIndicator steps={steps} currentStep={currentStep} />
+      <StepIndicator 
+        steps={steps} 
+        currentStep={currentStep} 
+        completedSteps={completedSteps}
+        onStepClick={handleStepClick}
+      />
 
       <div className="min-h-[500px]">{renderStep()}</div>
 
