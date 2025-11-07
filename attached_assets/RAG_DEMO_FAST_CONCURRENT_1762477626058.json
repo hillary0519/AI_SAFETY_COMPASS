@@ -1,0 +1,156 @@
+{
+  "name": "RAG_DEMO_FAST_CONCURRENT",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f7f0b3de-7417-408e-b6f1-172ead5ae07e",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "d230d256-5677-40af-b18f-66992146f97a"
+    },
+    {
+      "parameters": {
+        "functionCode": "const b = $json; if (!b.query) throw new Error('query is required'); const city = b.city ? String(b.city).slice(0,100) : ''; const q = String(b.query).slice(0,1500); return [{ json: { query: q, city } }];"
+      },
+      "id": "80b0c310-abf4-40be-8c02-e50c57a97636",
+      "name": "Sanitize Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "dd745722-1379-494b-93e0-3708cd3f336f",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        784,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$vars.REPLIT_API_URL}}/query",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={ \"Content-Type\": \"application/json\",\n  \"Authorization\": \"Bearer {{$vars.OPENAI_API_KEY}}\" }\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"query\": \"={{$json.query}}\", \"city\": \"={{$json.city || ''}}\" }\n",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "564b8bea-3870-457f-ad3d-48aa82c07c6c",
+      "name": "Replit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        528,
+        0
+      ]
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "taeng.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; ko-KR) WindowsPowerShell/5.1.26100.6899",
+            "content-length": "53",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "211.171.187.108",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "KR",
+            "cf-ray": "99a2fab162f0fcd4-FUK",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "211.171.187.108, 172.70.199.149",
+            "x-forwarded-host": "taeng.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-14-5654dfbc89-sq89q",
+            "x-is-trusted": "yes",
+            "x-real-ip": "211.171.187.108"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "query": "POSCO ??? ?? ?? ????",
+            "city": "Pohang"
+          },
+          "webhookUrl": "https://taeng.app.n8n.cloud/webhook/rag",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Sanitize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize Input": {
+      "main": [
+        [
+          {
+            "node": "Replit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replit": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1b4f5d84-71ba-49df-8457-8ef3936836dc",
+  "meta": {
+    "instanceId": "6b3fa791b84ad3d0f8ea13b1f7c789aa75bd89c3d93ee5a9187c3642339fd025"
+  },
+  "id": "UgVhEZ5x8FnBv8eI",
+  "tags": []
+}

@@ -157,6 +157,7 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
         open={compassOpen}
         onOpenChange={setCompassOpen}
         onNext={onCompassNext}
+        workInfo={data}
       />
     </div>
   );
