@@ -1,9 +1,12 @@
 interface WeatherResponse {
   location: string;
   temp: number;
+  temp_min: number;
+  temp_max: number;
   weather: string;
   humidity: number;
   wind_speed: number;
+  rainfall: number;
 }
 
 const cityMapping: Record<string, string> = {
@@ -62,12 +65,17 @@ export async function getWeatherInfo(city: string): Promise<WeatherResponse> {
     const weatherMain = data.weather?.[0]?.main || "Unknown";
     const weatherKorean = weatherMapping[weatherMain] || data.weather?.[0]?.description || "알 수 없음";
 
+    const rainfall = data.rain?.["1h"] || data.rain?.["3h"] || 0;
+
     return {
       location: city,
       temp: Math.round(data.main.temp * 10) / 10,
+      temp_min: Math.round(data.main.temp_min * 10) / 10,
+      temp_max: Math.round(data.main.temp_max * 10) / 10,
       weather: weatherKorean,
       humidity: data.main.humidity,
       wind_speed: Math.round(data.wind.speed * 10) / 10,
+      rainfall: Math.round(rainfall * 10) / 10,
     };
   } catch (error) {
     console.error("Weather API error:", error);

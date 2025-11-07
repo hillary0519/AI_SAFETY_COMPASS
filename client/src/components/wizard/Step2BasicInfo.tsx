@@ -2,8 +2,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Compass } from "lucide-react";
-import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Compass, Cloud, Droplet, Thermometer } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import SafetyCompassDialog from "@/components/SafetyCompassDialog";
 
 interface BasicInfo {
@@ -23,8 +25,42 @@ interface Step2Props {
   onCompassNext: (result: { addConfinedSpace: boolean; step3Data: any }) => void;
 }
 
+interface WeatherInfo {
+  location: string;
+  temp: number;
+  temp_min: number;
+  temp_max: number;
+  weather: string;
+  humidity: number;
+  wind_speed: number;
+  rainfall: number;
+}
+
 export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2Props) {
   const [compassOpen, setCompassOpen] = useState(false);
+  const [cityName, setCityName] = useState<string>("");
+
+  // Extract city name from work area
+  useEffect(() => {
+    if (data.workArea) {
+      const cities = ["포항", "광양", "서울", "부산", "인천", "대구", "대전", "광주", "울산", "창원"];
+      const foundCity = cities.find(city => data.workArea.includes(city));
+      setCityName(foundCity || "");
+    }
+  }, [data.workArea]);
+
+  // Fetch weather info
+  const { data: weatherInfo, isLoading: weatherLoading, error: weatherError } = useQuery<WeatherInfo>({
+    queryKey: ['/api/weather', cityName],
+    queryFn: async () => {
+      const response = await fetch(`/api/weather?city=${encodeURIComponent(cityName)}`);
+      if (!response.ok) {
+        throw new Error('날씨 정보를 불러올 수 없습니다');
+      }
+      return response.json();
+    },
+    enabled: cityName !== "" && data.workStartDate !== "",
+  });
 
   // Check if all required fields are filled
   const isFormComplete = 
@@ -127,6 +163,73 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
             />
           </div>
         </div>
+
+        {weatherInfo && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800" data-testid="card-weather-info">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                작업 지역 날씨 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-center gap-2">
+                  <Thermometer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">현재 기온</p>
+                    <p className="text-sm font-semibold" data-testid="text-current-temp">{weatherInfo.temp}°C</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Thermometer className="w-4 h-4 text-red-500" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">최고 기온</p>
+                    <p className="text-sm font-semibold" data-testid="text-max-temp">{weatherInfo.temp_max}°C</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Thermometer className="w-4 h-4 text-blue-500" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">최저 기온</p>
+                    <p className="text-sm font-semibold" data-testid="text-min-temp">{weatherInfo.temp_min}°C</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Droplet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">강수량</p>
+                    <p className="text-sm font-semibold" data-testid="text-rainfall">
+                      {weatherInfo.rainfall > 0 ? `${weatherInfo.rainfall}mm` : "없음"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">날씨 상태:</span>
+                  <span className="font-semibold" data-testid="text-weather-status">{weatherInfo.weather}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {weatherLoading && cityName && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-muted-foreground">날씨 정보를 불러오는 중...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {weatherError && cityName && (
+          <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-muted-foreground">날씨 정보를 불러올 수 없습니다. 작업 위치를 확인해주세요.</p>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="workDescription">작업 내용</Label>
