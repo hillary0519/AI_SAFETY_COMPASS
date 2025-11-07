@@ -20,7 +20,7 @@ interface BasicInfo {
 interface Step2Props {
   data: BasicInfo;
   onChange: (field: keyof BasicInfo, value: string) => void;
-  onCompassNext: (addConfinedSpace: boolean) => void;
+  onCompassNext: (result: { addConfinedSpace: boolean; step3Data: any }) => void;
 }
 
 export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2Props) {

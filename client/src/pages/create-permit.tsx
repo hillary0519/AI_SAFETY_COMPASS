@@ -45,11 +45,12 @@ export default function CreatePermit() {
     workDescription: "",
   });
   const [safetyChecks, setSafetyChecks] = useState({
-    requirements1: ["산소/유해/가연성 가스 측정", "송배풍기 설치", "전기차단/표시부착", "작업구역 표시"] as string[],
-    requirements2: ["작업감시자 배치(화기/밀폐)"] as string[],
-    equipment: ["안전보호구"] as string[],
-    protective: ["안전모/안전화", "보안경"] as string[],
+    requirements1: [] as string[],
+    requirements2: [] as string[],
+    equipment: [] as string[],
+    protective: [] as string[],
   });
+  const [step3DetailData, setStep3DetailData] = useState<any>(null);
 
   // 임시저장 불러오기
   useEffect(() => {
@@ -80,10 +81,11 @@ export default function CreatePermit() {
       workTypes,
       basicInfo,
       safetyChecks,
+      step3DetailData,
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
-  }, [currentStep, completedSteps, workTypes, basicInfo, safetyChecks]);
+  }, [currentStep, completedSteps, workTypes, basicInfo, safetyChecks, step3DetailData]);
 
   const loadDraft = () => {
     const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -103,11 +105,12 @@ export default function CreatePermit() {
         workDescription: "",
       });
       setSafetyChecks(draft.safetyChecks || {
-        requirements1: ["산소/유해/가연성 가스 측정", "송배풍기 설치", "전기차단/표시부착", "작업구역 표시"],
-        requirements2: ["작업감시자 배치(화기/밀폐)"],
-        equipment: ["안전보호구"],
-        protective: ["안전모/안전화", "보안경"],
+        requirements1: [],
+        requirements2: [],
+        equipment: [],
+        protective: [],
       });
+      setStep3DetailData(draft.step3DetailData || null);
       setHasDraft(false);
       toast({
         title: "임시저장본 불러오기",
@@ -151,7 +154,7 @@ export default function CreatePermit() {
       case 2:
         return completedSteps.includes(2);
       case 3:
-        return true;
+        return step3DetailData !== null;
       case 4:
         return casesViewedAll;
       default:
@@ -215,16 +218,29 @@ export default function CreatePermit() {
     setCurrentStep(stepNumber);
   };
 
-  const handleCompassNext = (addConfinedSpace: boolean) => {
-    if (addConfinedSpace && !workTypes.includes("밀폐공간작업")) {
+  const handleCompassNext = (result: { addConfinedSpace: boolean; step3Data: any }) => {
+    if (result.addConfinedSpace && !workTypes.includes("밀폐공간작업")) {
       setWorkTypes((prev) => [...prev, "밀폐공간작업"]);
       toast({
         title: "작업유형에 '밀폐공간작업'을 추가했습니다.",
         className: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
       });
     }
+    
+    setStep3DetailData(result.step3Data);
+    
+    setSafetyChecks({
+      requirements1: result.step3Data.requirements1,
+      requirements2: result.step3Data.requirements2,
+      equipment: result.step3Data.equipment,
+      protective: result.step3Data.protective,
+    });
+    
     if (!completedSteps.includes(2)) {
       setCompletedSteps((prev) => [...prev, 2]);
+    }
+    if (!completedSteps.includes(3)) {
+      setCompletedSteps((prev) => [...prev, 3]);
     }
     setCurrentStep(3);
   };
@@ -341,7 +357,7 @@ export default function CreatePermit() {
           />
         );
       case 3:
-        return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} />;
+        return <Step3SafetyCheck data={safetyChecks} onToggle={handleSafetyToggle} step3DetailData={step3DetailData} />;
       case 4:
         return (
           <Step4Review

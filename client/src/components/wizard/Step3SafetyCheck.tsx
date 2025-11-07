@@ -23,6 +23,7 @@ interface SafetyChecks {
 interface Step3Props {
   data: SafetyChecks;
   onToggle: (category: keyof SafetyChecks, item: string) => void;
+  step3DetailData: any;
 }
 
 const requirements1 = [
@@ -168,15 +169,39 @@ const riskAssessments = [
   },
 ];
 
-export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
+export default function Step3SafetyCheck({ data, onToggle, step3DetailData }: Step3Props) {
   const [useAfter, setUseAfter] = useState(false);
 
+  if (!step3DetailData) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">안전 점검 사항</h2>
+          <p className="text-muted-foreground">모든 안전 점검 항목을 확인하세요</p>
+        </div>
+
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="p-8 text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-primary" />
+            <h3 className="text-lg font-semibold mb-2">Safety Compass 분석이 필요합니다</h3>
+            <p className="text-muted-foreground">
+              2단계 기본 정보 입력 후 Safety Compass를 실행하면 <br />
+              안전 점검 항목이 자동으로 채워집니다.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const displayRiskAssessments = step3DetailData.riskAssessments || riskAssessments;
+
   // Calculate max R value for before and after
-  const maxRBefore = Math.max(...riskAssessments.map(item => item.r));
-  const maxRAfter = Math.max(...riskAssessments.map(item => Math.round(item.r * 1.2 * 10) / 10));
+  const maxRBefore = Math.max(...displayRiskAssessments.map((item: any) => item.r));
+  const maxRAfter = Math.max(...displayRiskAssessments.map((item: any) => Math.round(item.r * 1.2 * 10) / 10));
   
   // Calculate risk scores
-  const baseScore = riskAssessments.reduce((sum, item) => sum + item.r, 0);
+  const baseScore = displayRiskAssessments.reduce((sum: number, item: any) => sum + item.r, 0);
   const aiScore = 15; // AI-based score from equipment/temp/health factors
   const totalScore = baseScore + aiScore;
 
@@ -198,15 +223,15 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
           <p className="font-semibold text-destructive">전도위험, 감전위험, 밀폐공간 질식 위험</p>
           <div className="space-y-1">
             <p className="font-semibold">일반작업</p>
-            <p>이동시 실내 주변 이동에 의한 전도 위험</p>
+            <p>{step3DetailData.hazardPoints?.general || "이동시 실내 주변 이동에 의한 전도 위험"}</p>
           </div>
           <div className="space-y-1">
             <p className="font-semibold">전기작업</p>
-            <p>전원 미차단(AC 110V)에 의한 감전 위험</p>
+            <p>{step3DetailData.hazardPoints?.electrical || "전원 미차단(AC 110V)에 의한 감전 위험"}</p>
           </div>
           <div className="space-y-1">
             <p className="font-semibold">밀폐작업</p>
-            <p>산소 농도 저하에 의한 질식 위험</p>
+            <p>{step3DetailData.hazardPoints?.confined || "산소 농도 저하에 의한 질식 위험"}</p>
           </div>
         </CardContent>
       </Card>
@@ -350,7 +375,7 @@ export default function Step3SafetyCheck({ data, onToggle }: Step3Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {riskAssessments.map((item) => {
+              {displayRiskAssessments.map((item: any) => {
                 const rValue = useAfter ? Math.round(item.r * 1.2 * 10) / 10 : item.r;
                 const maxR = useAfter ? maxRAfter : maxRBefore;
                 const isMaxR = rValue === maxR;

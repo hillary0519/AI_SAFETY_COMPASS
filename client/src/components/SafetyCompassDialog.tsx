@@ -21,10 +21,15 @@ interface BasicInfo {
   workDescription: string;
 }
 
+interface SafetyCompassResult {
+  addConfinedSpace: boolean;
+  step3Data: any;
+}
+
 interface SafetyCompassDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onNext: (addConfinedSpace: boolean) => void;
+  onNext: (result: SafetyCompassResult) => void;
   workInfo: BasicInfo;
 }
 
@@ -77,8 +82,125 @@ export default function SafetyCompassDialog({
   }, [open, workInfo]);
 
   const handleNext = () => {
+    const step3Data = {
+      hazardPoints: {
+        general: "이동시 실내 주변 이동에 의한 전도 위험",
+        electrical: "전원 미차단(AC 110V)에 의한 감전 위험",
+        confined: "산소 농도 저하에 의한 질식 위험"
+      },
+      requirements1: ["산소/유해/가연성 가스 측정", "송배풍기 설치", "전기차단/표시부착", "작업구역 표시"],
+      requirements2: ["작업감시자 배치(화기/밀폐)"],
+      equipment: ["안전보호구"],
+      protective: ["안전모/안전화", "보안경"],
+      riskAssessments: [
+        {
+          id: 1,
+          procedure: "작업 전 위험성 평가 및 밀폐공간 허가서 작성",
+          hazard: "위험요인 미파악, 신입자 이해 부족",
+          accident: "부적절한 안전조치로 인한 사고",
+          f: 3,
+          c: 3,
+          r: 9,
+          mitigation: "신입자 대상 밀폐작업 안전교육 실시"
+        },
+        {
+          id: 2,
+          procedure: "작업장 환기 및 가스농도 측정",
+          hazard: "산소결핍, 유해가스(O₂<18%)",
+          accident: "질식, 의식소실",
+          f: 2,
+          c: 5,
+          r: 10,
+          mitigation: "불티팬 설치, 산소농도 측정기 사용, 농도기록 유지, 30분 간격 재측정"
+        },
+        {
+          id: 3,
+          procedure: "전원차단 및 Lock-Out / Tag-Out 실시",
+          hazard: "전원차단 미이행, 타회선 감전",
+          accident: "감전사고, 화상",
+          f: 3,
+          c: 3,
+          r: 9,
+          mitigation: "MCC 전원차단 후 LOTO 부착, 감전방지장갑·절연장구 사용, 담당자 확인서명"
+        },
+        {
+          id: 4,
+          procedure: "Sensor 탈거 작업",
+          hazard: "오염 누유, 바닥 미끄러움",
+          accident: "골절, 안전, 타박상",
+          f: 3,
+          c: 2,
+          r: 6,
+          mitigation: "흡유포 설치, 안전화 착용, 발판 고정, 바닥청소 철저"
+        },
+        {
+          id: 5,
+          procedure: "Sensor 결선 및 전선 접속",
+          hazard: "전열발열, 절연불량, 접속공간 자세",
+          accident: "감전, 근골격계 질환",
+          f: 3,
+          c: 3,
+          r: 9,
+          mitigation: "절연테이프 보강, 전원 차단확인, 스트레칭/휴식 병행"
+        },
+        {
+          id: 6,
+          procedure: "고열환경에서의 작업 지속",
+          hazard: "더위, 체온상승, 탈수",
+          accident: "열사병, 실신",
+          f: 2,
+          c: 3,
+          r: 6,
+          mitigation: "휴식 및 수분섭취 1시간 1회, 송풍기 가동, 냉타올 비치, 폭염 시 작업중지"
+        },
+        {
+          id: 7,
+          procedure: "협소공간 내 이동 및 작업자 교대",
+          hazard: "시야제한, 케이블 걸림",
+          accident: "낙상, 전도",
+          f: 3,
+          c: 3,
+          r: 9,
+          mitigation: "케이블 정리, 조명 확보기, 2인 1조 작업, 접근로 확보"
+        },
+        {
+          id: 8,
+          procedure: "교체 후 전원 투입 전 점검",
+          hazard: "전원 조기투입, 접지불량",
+          accident: "감전, 장비손상",
+          f: 3,
+          c: 3,
+          r: 9,
+          mitigation: "접선, 절연저항계, 계측기 사용"
+        },
+        {
+          id: 9,
+          procedure: "작업후 청소 및 장비 원위치",
+          hazard: "바닥 오염잔류, 도구 방치",
+          accident: "전도, 낙상",
+          f: 2,
+          c: 3,
+          r: 6,
+          mitigation: "청소장소 및 도구 정리 후 확인서명, 정리정돈 점검"
+        },
+        {
+          id: 10,
+          procedure: "작업종료 보고 및 허가서 회수",
+          hazard: "보고 누락, 허가서 미회수",
+          accident: "관리 부실, 재발 방지 실패",
+          f: 1,
+          c: 3,
+          r: 3,
+          mitigation: "작업종료 보고서 작성, 허가서 회수 후 보관"
+        }
+      ]
+    };
+
     onOpenChange(false);
-    onNext(addConfinedSpace);
+    onNext({
+      addConfinedSpace,
+      step3Data
+    });
   };
 
   return (
