@@ -198,7 +198,13 @@ export default function Step3SafetyCheck({ data, onToggle, step3DetailData }: St
 
   // Calculate max R value for before and after
   const maxRBefore = Math.max(...displayRiskAssessments.map((item: any) => item.r));
-  const maxRAfter = Math.max(...displayRiskAssessments.map((item: any) => Math.round(item.r * 1.2 * 10) / 10));
+  const maxRAfter = Math.max(...displayRiskAssessments.map((item: any) => {
+    // Only apply 1.2x multiplier to rows 2 and 6
+    if (item.id === 2 || item.id === 6) {
+      return Math.round(item.r * 1.2 * 10) / 10;
+    }
+    return item.r;
+  }));
   
   // Calculate risk scores
   const baseScore = displayRiskAssessments.reduce((sum: number, item: any) => sum + item.r, 0);
@@ -376,7 +382,10 @@ export default function Step3SafetyCheck({ data, onToggle, step3DetailData }: St
             </TableHeader>
             <TableBody>
               {displayRiskAssessments.map((item: any) => {
-                const rValue = useAfter ? Math.round(item.r * 1.2 * 10) / 10 : item.r;
+                // Only apply 1.2x multiplier to rows 2 and 6 in AFTER mode
+                const rValue = useAfter && (item.id === 2 || item.id === 6)
+                  ? Math.round(item.r * 1.2 * 10) / 10
+                  : item.r;
                 const maxR = useAfter ? maxRAfter : maxRBefore;
                 const isMaxR = rValue === maxR;
                 
