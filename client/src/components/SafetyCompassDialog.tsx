@@ -51,7 +51,7 @@ export default function SafetyCompassDialog({
       const query = `작업명: ${workInfo.workName}\n설비명: ${workInfo.equipmentName}\n작업자: ${workInfo.workerName}\n작업 내용: ${workInfo.workDescription}`;
       const city = workInfo.workArea;
 
-      fetch('https://taeng.app.n8n.cloud/webhook-test/rag', {
+      fetch('https://taeng.app.n8n.cloud/webhook/rag', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
