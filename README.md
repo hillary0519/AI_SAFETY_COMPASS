@@ -5,12 +5,19 @@
 
 [🔗 데모 보기](https://smart-permit-ai-team12.replit.app/) ｜ [💻 GitHub](https://github.com/hillary0519/AI_SAFETY_COMPASS)
 
+
+
 ---
 
 ## 🚀 프로젝트 개요
 
 작업자가 기본 정보만 입력하면 **AI가 안전조치·위험요인·작업절차**를 자동 제안하는 **안전작업허가서 생성 서비스**입니다.
 과거 사고사례 **RAG**, 실시간 날씨(**OpenWeather API**), **n8n 워크플로우**를 결합하여 작성 시간을 단축하고 현장 안전성을 높입니다.
+
+---
+## 📸 미리보기
+
+<img width="1920" height="1080" alt="안전작업허가서 생성 시스템 - Chrome 2025-11-07 오후 12_34_52" src="https://github.com/user-attachments/assets/cf0079e2-599e-4440-af38-bb4f9380c539" />
 
 ---
 
