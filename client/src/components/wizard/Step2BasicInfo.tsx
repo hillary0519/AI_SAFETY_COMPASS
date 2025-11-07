@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, Cloud, Droplet, Thermometer } from "lucide-react";
+import { Compass, Cloud, Droplet, Thermometer, Wind } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import SafetyCompassDialog from "@/components/SafetyCompassDialog";
@@ -25,15 +25,19 @@ interface Step2Props {
   onCompassNext: (result: { addConfinedSpace: boolean; step3Data: any }) => void;
 }
 
-interface WeatherInfo {
-  location: string;
+interface DailyForecast {
+  date: string;
+  dayOfWeek: string;
   temp: number;
-  temp_min: number;
-  temp_max: number;
   weather: string;
   humidity: number;
   wind_speed: number;
   rainfall: number;
+}
+
+interface WeatherInfo {
+  location: string;
+  forecasts: DailyForecast[];
 }
 
 export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2Props) {
@@ -164,56 +168,65 @@ export default function Step2BasicInfo({ data, onChange, onCompassNext }: Step2P
           </div>
         </div>
 
-        <div className="min-h-[120px]">
-          {weatherInfo && (
-            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800" data-testid="card-weather-info">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  작업 지역 날씨 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">현재 기온</p>
-                      <p className="text-sm font-semibold" data-testid="text-current-temp">{weatherInfo.temp}°C</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="w-4 h-4 text-red-500" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">최고 기온</p>
-                      <p className="text-sm font-semibold" data-testid="text-max-temp">{weatherInfo.temp_max}°C</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="w-4 h-4 text-blue-500" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">최저 기온</p>
-                      <p className="text-sm font-semibold" data-testid="text-min-temp">{weatherInfo.temp_min}°C</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Droplet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">강수량</p>
-                      <p className="text-sm font-semibold" data-testid="text-rainfall">
-                        {weatherInfo.rainfall > 0 ? `${weatherInfo.rainfall}mm` : "없음"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">날씨 상태:</span>
-                    <span className="font-semibold" data-testid="text-weather-status">{weatherInfo.weather}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="min-h-[180px]">
+          {weatherInfo && weatherInfo.forecasts && weatherInfo.forecasts.length > 0 && (
+            <div data-testid="card-weather-info">
+              <div className="flex items-center gap-2 mb-3">
+                <Cloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-base font-semibold">작업 지역 날씨 정보</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {weatherInfo.forecasts.map((forecast, index) => (
+                  <Card 
+                    key={index} 
+                    className="border-gray-200 dark:border-gray-700"
+                    data-testid={`weather-card-${index}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-3">
+                        <div>
+                          <p className="text-sm font-semibold" data-testid={`day-name-${index}`}>
+                            {forecast.dayOfWeek}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{forecast.date}</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-center">
+                          <Cloud className="w-12 h-12 text-yellow-400" />
+                        </div>
+                        
+                        <p className="text-2xl font-bold" data-testid={`temp-${index}`}>
+                          {forecast.temp}°C
+                        </p>
+                        
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between gap-1">
+                            <div className="flex items-center gap-1">
+                              <Droplet className="w-3 h-3 text-blue-500" />
+                              <span className="text-muted-foreground">
+                                {forecast.rainfall > 0 ? `${forecast.rainfall}mm` : "0mm"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Cloud className="w-3 h-3 text-gray-500" />
+                              <span className="text-muted-foreground">
+                                습도 {forecast.humidity}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-center gap-1">
+                            <Wind className="w-3 h-3 text-gray-500" />
+                            <span className="text-muted-foreground">
+                              {forecast.wind_speed}m/s
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           )}
 
           {weatherLoading && cityName && (
