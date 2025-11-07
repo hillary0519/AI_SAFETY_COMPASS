@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getChatResponse } from "./openai";
 import { getRAGService } from "./rag";
+import { getWeatherInfo } from "./weather";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoint for accident cases
@@ -130,6 +131,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get case error:", error);
       res.status(500).json({ error: "Failed to get case" });
+    }
+  });
+
+  // Weather endpoint
+  app.get("/api/weather", async (req, res) => {
+    try {
+      const { city } = req.query;
+
+      if (!city || typeof city !== "string") {
+        return res.status(400).json({ error: "City parameter is required" });
+      }
+
+      const weatherInfo = await getWeatherInfo(city);
+      res.json(weatherInfo);
+    } catch (error) {
+      console.error("Weather API error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch weather information";
+      res.status(500).json({ error: errorMessage });
     }
   });
 
