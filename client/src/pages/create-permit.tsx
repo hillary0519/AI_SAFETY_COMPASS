@@ -328,7 +328,7 @@ export default function CreatePermit() {
         </Card>
       )}
 
-      <StepIndicator steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
+      <StepIndicator steps={steps} currentStep={currentStep} />
 
       <div className="min-h-[500px]">{renderStep()}</div>
 
