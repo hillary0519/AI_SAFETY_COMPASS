@@ -15,9 +15,9 @@ interface StepIndicatorProps {
 export default function StepIndicator({ steps, currentStep, completedSteps, onStepClick }: StepIndicatorProps) {
   const isStepClickable = (stepNumber: number) => {
     if (!onStepClick) return false;
-    if (stepNumber <= currentStep) return true;
-    if (stepNumber === currentStep + 1 && completedSteps.includes(currentStep)) return true;
-    return false;
+    const isCompleted = completedSteps.includes(stepNumber);
+    const isCurrent = stepNumber === currentStep;
+    return isCompleted || isCurrent;
   };
 
   return (
@@ -38,7 +38,7 @@ export default function StepIndicator({ steps, currentStep, completedSteps, onSt
                     : step.number === currentStep
                     ? "bg-primary border-primary text-primary-foreground"
                     : "bg-background border-border text-muted-foreground"
-                } ${isClickable ? 'cursor-pointer hover-elevate active-elevate-2' : 'cursor-not-allowed opacity-50'}`}
+                } ${isClickable ? 'cursor-pointer hover-elevate active-elevate-2' : 'cursor-default'}`}
                 data-testid={`step-${step.number}`}
               >
                 {isCompleted ? (
